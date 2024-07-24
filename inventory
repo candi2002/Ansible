@@ -1,3 +1,4 @@
-[all]
-192.168.0.63 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
-192.168.0.71 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
+[controller]
+192.168.9.157 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
+[host]
+192.168.9.158 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
