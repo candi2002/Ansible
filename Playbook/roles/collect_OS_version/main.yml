@@ -1,0 +1,5 @@
+---
+- name: collect Os version of all hosts
+  hosts: all
+  tasks: 
+
