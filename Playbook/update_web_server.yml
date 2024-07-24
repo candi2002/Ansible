@@ -13,7 +13,7 @@
 
           @app.route('/')
           def home():
-              return "Anh đang thử cái web, em coi có lên khum?"
+              return "Thử một cái mới thui"
 
           if __name__ == "__main__":
               app.run(host='0.0.0.0', port=5000)
