@@ -14,7 +14,26 @@
           @app.route('/', methods=['GET', 'POST'])
           def home():
               if request.method == 'POST':
-                  return "Bạn rất đẹp trai"
+                  return '''
+                  <!doctype html>
+                  <html lang="en">
+                    <head>
+                      <meta charset="utf-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                      <title>Kết quả</title>
+                      <style>
+                        .centered {
+                          text-align: center;
+                          font-size: 48px;
+                          margin-top: 20%;
+                        }
+                      </style>
+                    </head>
+                    <body>
+                      <div class="centered">Bạn rất đẹp trai</div>
+                    </body>
+                  </html>
+                  '''
               return '''
                   <!doctype html>
                   <html lang="en">
