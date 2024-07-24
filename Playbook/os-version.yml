@@ -1,0 +1,10 @@
+- name: Lấy thông tin phiên bản hệ điều hành của các máy chủ
+  hosts: all
+  gather_facts: yes
+  become: yes
+
+  tasks:
+    - name: Hiển thị thông tin phiên bản hệ điều hành
+      debug:
+        msg: "Hệ điều hành: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+

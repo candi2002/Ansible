@@ -1,0 +1,15 @@
+---
+- name: Lấy syslog từ các máy chủ Ubuntu
+  hosts: all
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Lấy syslog trên các máy chủ Ubuntu
+      command: cat /var/log/syslog
+      register: ubuntu_syslog
+
+    - name: Hiển thị syslog trên các máy chủ Ubuntu
+      debug:
+        msg: "{{ ubuntu_syslog.stdout }}"
+

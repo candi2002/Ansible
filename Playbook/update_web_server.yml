@@ -1,0 +1,28 @@
+---
+- name: Update Flask Web Server Content
+  hosts: controller
+  become: yes
+  tasks:
+
+    - name: Update the Flask app file with new content
+      copy:
+        dest: /opt/flask_app/app.py
+        content: |
+          from flask import Flask
+          app = Flask(__name__)
+
+          @app.route('/')
+          def home():
+              return "Anh đang thử cái web, em coi có lên khum?"
+
+          if __name__ == "__main__":
+              app.run(host='0.0.0.0', port=5000)
+      notify: Restart Flask app service
+
+  handlers:
+    - name: Restart Flask app service
+      systemd:
+        name: flask_app
+        state: restarted
+        enabled: yes
+

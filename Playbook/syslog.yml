@@ -1,0 +1,13 @@
+---
+- name: Đọc nội dung syslog
+  hosts: all
+  become: yes
+  tasks:
+    - name: Hiển thị nội dung của syslog
+      command: cat /var/log/syslog
+      register: syslog_content
+
+    - name: Hiển thị nội dung của syslog
+      debug:
+        var: syslog_content.stdout
+
