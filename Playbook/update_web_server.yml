@@ -16,11 +16,11 @@
               if request.method == 'POST':
                   choice = request.form.get('choice')
                   if choice == 'dep_trai':
-                      message = "Bạn đã chọn một người đàn ông đẹp trai, vì vậy bạn đẹp trai."
+                      message = 'Bạn đã chọn một người đàn ông đẹp trai, vì vậy bạn đẹp trai.'
                   elif choice == 'giau_co':
-                      message = "Bạn đã chọn cưới một người đàn ông giàu có, vì vậy bạn đẹp trai."
+                      message = 'Bạn đã chọn cưới một người đàn ông giàu có, vì vậy bạn đẹp trai.'
                   else:
-                      message = "Lựa chọn không hợp lệ."
+                      message = 'Lựa chọn không hợp lệ.'
                   return '''
                   <!doctype html>
                   <html lang="en">
