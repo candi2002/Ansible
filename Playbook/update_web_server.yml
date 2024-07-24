@@ -8,13 +8,20 @@
       copy:
         dest: /opt/flask_app/app.py
         content: |
-          from flask import Flask, request, render_template_string
+          from flask import Flask, request
           app = Flask(__name__)
 
           @app.route('/', methods=['GET', 'POST'])
           def home():
               if request.method == 'POST':
-                  return '''
+                  choice = request.form.get('choice')
+                  if choice == 'dep_trai':
+                      message = "Bạn đã chọn cưới một người đàn ông đẹp trai, vì vậy bạn GAY."
+                  elif choice == 'giau_co':
+                      message = "Bạn đã chọn cưới một người đàn ông giàu có, vì vậy bạn GAY."
+                  else:
+                      message = "Lựa chọn không hợp lệ."
+                  return f'''
                   <!doctype html>
                   <html lang="en">
                     <head>
@@ -22,15 +29,15 @@
                       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
                       <title>Kết quả</title>
                       <style>
-                        .centered {
+                        .centered {{
                           text-align: center;
                           font-size: 48px;
                           margin-top: 20%;
-                        }
+                        }}
                       </style>
                     </head>
                     <body>
-                      <div class="centered">Bạn rất đẹp trai</div>
+                      <div class="centered">{message}</div>
                     </body>
                   </html>
                   '''
