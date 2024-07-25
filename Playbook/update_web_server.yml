@@ -28,6 +28,11 @@
     - name: Install Flask and Flask-SQLAlchemy in virtual environment
       command: /opt/flask_app/venv/bin/pip install Flask flask_sqlalchemy
 
+    - name: Install SQLite3
+      apt:
+        name: sqlite3
+        state: present
+
     - name: Create the initial Flask app file
       copy:
         dest: /opt/flask_app/app.py
@@ -128,11 +133,6 @@
     - name: Debug service status
       debug:
         msg: "{{ service_status.stdout }}"
-
-    - name: Install SQLite3
-      apt:
-        name: sqlite3
-        state: present
 
     - name: Ensure SQLite database exists
       command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT);"
