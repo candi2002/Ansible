@@ -1,5 +1,5 @@
 ---
-- name: Update Quiz Web App
+- name: Deploy Quiz Web App
   hosts: controller
   become: yes
   tasks:
@@ -34,10 +34,9 @@
                       db.session.add(new_quiz)
                       db.session.commit()
                       return redirect('/')
-                  except:
-                      return 'There was an issue adding your quiz'
-              else:
-                  return render_template('add.html')
+                  except Exception as e:
+                      return f'There was an issue adding your quiz: {e}'
+              return render_template('add.html')
 
           @app.route('/quiz/<int:id>')
           def quiz(id):
@@ -61,11 +60,18 @@
           Group=www-data
           WorkingDirectory=/opt/flask_app
           Environment="PATH=/opt/flask_app/venv/bin"
-          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 app:app
+          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 wsgi:app
 
           [Install]
           WantedBy=multi-user.target
       notify: Restart Flask app service
+
+    - name: Ensure the Flask app working directory exists
+      file:
+        path: /opt/flask_app
+        state: directory
+        owner: root
+        group: www-data
 
     - name: Copy the Flask app templates
       copy:
