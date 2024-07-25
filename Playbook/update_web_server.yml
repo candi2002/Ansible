@@ -14,7 +14,6 @@
         content: |
           from flask import Flask, render_template
           from flask_sqlalchemy import SQLAlchemy
-          import os
 
           app = Flask(__name__)
           app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.db'
@@ -142,9 +141,9 @@
         host_data: >-
           INSERT INTO host (name, os_version, syslogs, packages)
           VALUES ('{{ item }}',
-                  '{{ (os_version.results | selectattr('item', 'equalto', item) | first).stdout | replace("\n", " ") | replace("'", "''") }}',
-                  '{{ (syslogs.results | selectattr('item', 'equalto', item) | first).stdout | replace("\n", " ") | replace("'", "''") }}',
-                  '{{ (packages.results | selectattr('item', 'equalto', item) | first).stdout | replace("\n", " ") | replace("'", "''") }}');
+                  '{{ (os_version.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
+                  '{{ (syslogs.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
+                  '{{ (packages.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}');
 
       with_items: "{{ groups['all'] }}"
       loop_control:
