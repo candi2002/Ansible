@@ -51,7 +51,7 @@
 
           @app.route('/')
           def home():
-              host = Host.query.all()
+              hosts = Host.query.all()  # Ensure 'hosts' is defined here
               template = '''
               <!doctype html>
               <html>
@@ -68,7 +68,7 @@
               </body>
               </html>
               '''
-              return render_template_string(template, hosts=hosts)
+              return render_template_string(template, hosts=hosts)  # And passed to the template
 
           @app.route('/host/<int:id>')
           def host(id):
