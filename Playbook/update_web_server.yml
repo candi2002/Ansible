@@ -41,7 +41,7 @@
           from flask_sqlalchemy import SQLAlchemy
 
           app = Flask(__name__)
-          app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////opt/flask_app/quiz.db'
+          app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.db'
           db = SQLAlchemy(app)
 
           class Host(db.Model):
@@ -51,7 +51,7 @@
 
           @app.route('/')
           def home():
-              hosts = Host.query.all()  # Ensure 'hosts' is defined here
+              hosts = Host.query.all()
               template = '''
               <!doctype html>
               <html>
@@ -68,7 +68,7 @@
               </body>
               </html>
               '''
-              return render_template_string(template, hosts=hosts)  # And passed to the template
+              return render_template_string(template, hosts=hosts)
 
           @app.route('/host/<int:id>')
           def host(id):
@@ -103,7 +103,6 @@
           [Service]
           User=candi
           WorkingDirectory=/opt/flask_app
-          Environment="PATH=/opt/flask_app/venv/bin"
           ExecStart=/opt/flask_app/venv/bin/python /opt/flask_app/app.py
           Restart=always
 
@@ -111,8 +110,7 @@
           WantedBy=multi-user.target
 
     - name: Reload systemd to apply changes
-      systemd:
-        daemon_reload: yes
+      command: systemctl daemon-reload
 
     - name: Enable and start Flask app service
       systemd:
@@ -126,6 +124,15 @@
         port: 5000
         proto: tcp
         comment: "Allow Flask web server traffic on port 5000"
+
+    - name: Check Flask app service status
+      shell: systemctl status flask_app
+      register: service_status
+      ignore_errors: yes
+
+    - name: Debug service status
+      debug:
+        msg: "{{ service_status.stdout }}"
 
     - name: Ensure SQLite database exists
       command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT);"
@@ -142,7 +149,7 @@
           INSERT INTO host (name, os_version)
           VALUES (
             '{{ item }}',
-            '{{ os_version.results[ansible_loop.index0].stdout | regex_replace("'", "''") | regex_replace('\n', ' ') }}'
+            '{{ (os_version.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}'
           );
       loop: "{{ groups['all'] }}"
 
@@ -151,6 +158,25 @@
       loop: "{{ groups['all'] }}"
       loop_control:
         loop_var: item
+
+    - name: Ensure the Flask app service file is updated
+      copy:
+        dest: /etc/systemd/system/flask_app.service
+        content: |
+          [Unit]
+          Description=Gunicorn instance to serve flask_app
+          After=network.target
+
+          [Service]
+          User=candi
+          Group=www-data
+          WorkingDirectory=/opt/flask_app
+          Environment="PATH=/opt/flask_app/venv/bin"
+          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 wsgi:app
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart Flask app service
 
   handlers:
     - name: Restart Flask app service
