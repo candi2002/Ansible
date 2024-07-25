@@ -1,26 +1,8 @@
 ---
-- name: Deploy Quiz Web App
+- name: Update Quiz Web App
   hosts: controller
   become: yes
   tasks:
-    - name: Ensure required packages are installed
-      apt:
-        name:
-          - python3
-          - python3-venv
-          - python3-pip
-        state: present
-
-    - name: Create a virtual environment for the Flask app
-      command: python3 -m venv /opt/flask_app/venv
-      args:
-        creates: /opt/flask_app/venv/bin/activate
-
-    - name: Install Flask and other dependencies in the virtual environment
-      command: /opt/flask_app/venv/bin/pip install flask flask_sqlalchemy
-      args:
-        creates: /opt/flask_app/venv/lib/python3.12/site-packages/flask
-
     - name: Update the Flask app file with new content
       copy:
         dest: /opt/flask_app/app.py
@@ -79,18 +61,11 @@
           Group=www-data
           WorkingDirectory=/opt/flask_app
           Environment="PATH=/opt/flask_app/venv/bin"
-          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 wsgi:app
+          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 app:app
 
           [Install]
           WantedBy=multi-user.target
       notify: Restart Flask app service
-
-    - name: Ensure the Flask app working directory exists
-      file:
-        path: /opt/flask_app
-        state: directory
-        owner: root
-        group: www-data
 
     - name: Copy the Flask app templates
       copy:
