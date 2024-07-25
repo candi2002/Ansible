@@ -7,41 +7,30 @@
       copy:
         dest: /opt/flask_app/app.py
         content: |
-          from flask import Flask, render_template, request, redirect, url_for
+          from flask import Flask, render_template
           from flask_sqlalchemy import SQLAlchemy
+          import subprocess
 
           app = Flask(__name__)
           app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.db'
           db = SQLAlchemy(app)
 
-          class Quiz(db.Model):
+          class Host(db.Model):
               id = db.Column(db.Integer, primary_key=True)
-              question = db.Column(db.String(200), nullable=False)
-              answer = db.Column(db.String(200), nullable=False)
+              name = db.Column(db.String(100), nullable=False)
+              os_version = db.Column(db.String(100), nullable=False)
+              syslogs = db.Column(db.Text, nullable=False)
+              packages = db.Column(db.Text, nullable=False)
 
           @app.route('/')
           def home():
-              quizzes = Quiz.query.all()
-              return render_template('home.html', quizzes=quizzes)
+              hosts = Host.query.all()
+              return render_template('home.html', hosts=hosts)
 
-          @app.route('/add', methods=['GET', 'POST'])
-          def add():
-              if request.method == 'POST':
-                  question = request.form['question']
-                  answer = request.form['answer']
-                  new_quiz = Quiz(question=question, answer=answer)
-                  try:
-                      db.session.add(new_quiz)
-                      db.session.commit()
-                      return redirect('/')
-                  except Exception as e:
-                      return f'There was an issue adding your quiz: {e}'
-              return render_template('add.html')
-
-          @app.route('/quiz/<int:id>')
-          def quiz(id):
-              quiz = Quiz.query.get_or_404(id)
-              return render_template('quiz.html', quiz=quiz)
+          @app.route('/host/<int:id>')
+          def host(id):
+              host = Host.query.get_or_404(id)
+              return render_template('host.html', host=host)
 
           if __name__ == "__main__":
               db.create_all()
@@ -81,14 +70,13 @@
           <!doctype html>
           <html>
           <head>
-              <title>Quiz App</title>
+              <title>Host Information</title>
           </head>
           <body>
-              <h1>Welcome to the Quiz App</h1>
-              <a href="/add">Add a New Quiz</a>
+              <h1>Host Information</h1>
               <ul>
-              {% for quiz in quizzes %}
-                  <li><a href="/quiz/{{ quiz.id }}">{{ quiz.question }}</a></li>
+              {% for host in hosts %}
+                  <li><a href="/host/{{ host.id }}">{{ host.name }}</a></li>
               {% endfor %}
               </ul>
           </body>
@@ -98,25 +86,24 @@
         owner: root
         group: www-data
 
-    - name: Copy the add quiz template
+    - name: Copy the host detail template
       copy:
-        dest: /opt/flask_app/templates/add.html
+        dest: /opt/flask_app/templates/host.html
         content: |
           {% raw %}
           <!doctype html>
           <html>
           <head>
-              <title>Add a New Quiz</title>
+              <title>Host Details</title>
           </head>
           <body>
-              <h1>Add a New Quiz</h1>
-              <form method="POST">
-                  <label for="question">Question:</label><br>
-                  <input type="text" id="question" name="question"><br>
-                  <label for="answer">Answer:</label><br>
-                  <input type="text" id="answer" name="answer"><br><br>
-                  <input type="submit" value="Submit">
-              </form>
+              <h1>Host: {{ host.name }}</h1>
+              <h2>OS Version</h2>
+              <p>{{ host.os_version }}</p>
+              <h2>Syslogs</h2>
+              <pre>{{ host.syslogs }}</pre>
+              <h2>Installed Packages</h2>
+              <pre>{{ host.packages }}</pre>
           </body>
           </html>
           {% endraw %}
@@ -124,25 +111,28 @@
         owner: root
         group: www-data
 
-    - name: Copy the quiz detail template
-      copy:
-        dest: /opt/flask_app/templates/quiz.html
-        content: |
-          {% raw %}
-          <!doctype html>
-          <html>
-          <head>
-              <title>Quiz Detail</title>
-          </head>
-          <body>
-              <h1>{{ quiz.question }}</h1>
-              <p>{{ quiz.answer }}</p>
-          </body>
-          </html>
-          {% endraw %}
-        mode: 0644
-        owner: root
-        group: www-data
+    - name: Gather information from all hosts
+      gather_facts: no
+      setup:
+
+    - name: Collect OS version, syslogs and installed packages
+      shell: |
+        echo '{{ inventory_hostname }}'
+        uname -a
+        grep -i error /var/log/syslog
+        dpkg --list
+      register: host_info
+
+    - name: Update database with host information
+      block:
+        - name: Ensure SQLite database exists
+          command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT, syslogs TEXT, packages TEXT);"
+
+        - name: Insert host information into the database
+          command: >
+            sqlite3 /opt/flask_app/quiz.db
+            "INSERT INTO host (name, os_version, syslogs, packages)
+             VALUES ('{{ inventory_hostname }}', '{{ host_info.stdout_lines[1] }}', '{{ host_info.stdout_lines[2] }}', '{{ host_info.stdout_lines[3] }}');"
 
   handlers:
     - name: Restart Flask app service
