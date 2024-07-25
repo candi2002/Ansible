@@ -119,19 +119,19 @@
       command: uname -a
       register: os_version
       delegate_to: "{{ item }}"
-      loop: "{{ groups['all'] }}"
+      with_items: "{{ groups['all'] }}"
 
     - name: Gather syslogs related to errors
       shell: grep -i error /var/log/syslog || true
       register: syslogs
       delegate_to: "{{ item }}"
-      loop: "{{ groups['all'] }}"
+      with_items: "{{ groups['all'] }}"
 
     - name: Gather installed packages
       shell: dpkg --list
       register: packages
       delegate_to: "{{ item }}"
-      loop: "{{ groups['all'] }}"
+      with_items: "{{ groups['all'] }}"
 
     - name: Ensure SQLite database exists
       command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT, syslogs TEXT, packages TEXT);"
@@ -142,12 +142,12 @@
           INSERT INTO host (name, os_version, syslogs, packages)
           VALUES (
             '{{ item }}',
-            '{{ (os_version.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
-            '{{ (syslogs.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
-            '{{ (packages.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}'
+            '{{ (os_version.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
+            '{{ (syslogs.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
+            '{{ (packages.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}'
           );
 
-      loop: "{{ groups['all'] }}"
+      with_items: "{{ groups['all'] }}"
 
     - name: Update database with host information
       command: "echo '{{ host_sql }}' | sqlite3 /opt/flask_app/quiz.db"
