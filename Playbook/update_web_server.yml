@@ -141,14 +141,9 @@
       command: >
         sqlite3 /opt/flask_app/quiz.db
         "INSERT INTO host (name, os_version, syslogs, packages)
-         VALUES ('{{ item }}', '{{ host_info.os_version }}', '{{ host_info.syslogs }}', '{{ host_info.packages }}');"
+         VALUES ('{{ item }}', '{{ os_version.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}', '{{ syslogs.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}', '{{ packages.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}');"
       with_items: "{{ groups['all'] }}"
-      vars:
-        host_info:
-          os_version: "{{ os_version.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join(' ') }}"
-          syslogs: "{{ syslogs.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join(' ') }}"
-          packages: "{{ packages.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join(' ') }}"
-          
+
   handlers:
     - name: Restart Flask app service
       systemd:
