@@ -3,6 +3,11 @@
   hosts: controller
   become: yes
   tasks:
+    - name: Install SQLite3
+      apt:
+        name: sqlite3
+        state: present
+
     - name: Update the Flask app file with new content
       copy:
         dest: /opt/flask_app/app.py
