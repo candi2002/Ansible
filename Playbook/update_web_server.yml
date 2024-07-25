@@ -121,7 +121,7 @@
       register: os_version
       delegate_to: "{{ item }}"
       with_items: "{{ groups['all'] }}"
-    
+
     - name: Gather syslogs related to errors
       shell: grep -i error /var/log/syslog || true
       register: syslogs
@@ -139,9 +139,12 @@
 
     - name: Prepare data for insertion
       set_fact:
-        host_data: |
+        host_data: >-
           INSERT INTO host (name, os_version, syslogs, packages)
-          VALUES ('{{ item }}', '{{ os_version.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}', '{{ syslogs.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}', '{{ packages.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}');
+          VALUES ('{{ item }}',
+                  '{{ (os_version.results | selectattr('item', 'equalto', item) | first).stdout | replace("\n", " ") | replace("'", "''") }}',
+                  '{{ (syslogs.results | selectattr('item', 'equalto', item) | first).stdout | replace("\n", " ") | replace("'", "''") }}',
+                  '{{ (packages.results | selectattr('item', 'equalto', item) | first).stdout | replace("\n", " ") | replace("'", "''") }}');
 
       with_items: "{{ groups['all'] }}"
       loop_control:
