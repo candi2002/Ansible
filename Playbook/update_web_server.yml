@@ -9,7 +9,7 @@
         content: |
           from flask import Flask, render_template
           from flask_sqlalchemy import SQLAlchemy
-          import subprocess
+          import os
 
           app = Flask(__name__)
           app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.db'
@@ -111,17 +111,23 @@
         owner: root
         group: www-data
 
-    - name: Gather information from all hosts
-      gather_facts: no
-      setup:
+    - name: Gather OS version
+      command: uname -a
+      register: os_version
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['all'] }}"
+    
+    - name: Gather syslogs related to errors
+      shell: grep -i error /var/log/syslog || true
+      register: syslogs
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['all'] }}"
 
-    - name: Collect OS version, syslogs and installed packages
-      shell: |
-        echo '{{ inventory_hostname }}'
-        uname -a
-        grep -i error /var/log/syslog
-        dpkg --list
-      register: host_info
+    - name: Gather installed packages
+      shell: dpkg --list
+      register: packages
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['all'] }}"
 
     - name: Update database with host information
       block:
@@ -132,7 +138,14 @@
           command: >
             sqlite3 /opt/flask_app/quiz.db
             "INSERT INTO host (name, os_version, syslogs, packages)
-             VALUES ('{{ inventory_hostname }}', '{{ host_info.stdout_lines[1] }}', '{{ host_info.stdout_lines[2] }}', '{{ host_info.stdout_lines[3] }}');"
+             VALUES ('{{ item.item }}', '{{ item.os_version.stdout }}', '{{ item.syslogs.stdout }}', '{{ item.packages.stdout }}');"
+          with_items:
+            - os_version: "{{ os_version.results }}"
+              syslogs: "{{ syslogs.results }}"
+              packages: "{{ packages.results }}"
+              item: "{{ item }}"
+          loop_control:
+            label: "{{ item.item }}"
 
   handlers:
     - name: Restart Flask app service
