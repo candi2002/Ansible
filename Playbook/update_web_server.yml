@@ -134,24 +134,21 @@
       delegate_to: "{{ item }}"
       with_items: "{{ groups['all'] }}"
 
+    - name: Ensure SQLite database exists
+      command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT, syslogs TEXT, packages TEXT);"
+
     - name: Update database with host information
-      block:
-        - name: Ensure SQLite database exists
-          command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT, syslogs TEXT, packages TEXT);"
-
-        - name: Insert host information into the database
-          command: >
-            sqlite3 /opt/flask_app/quiz.db
-            "INSERT INTO host (name, os_version, syslogs, packages)
-             VALUES ('{{ item.item }}', '{{ item.os_version.stdout }}', '{{ item.syslogs.stdout }}', '{{ item.packages.stdout }}');"
-          with_items:
-            - os_version: "{{ os_version.results }}"
-              syslogs: "{{ syslogs.results }}"
-              packages: "{{ packages.results }}"
-              item: "{{ item }}"
-          loop_control:
-            label: "{{ item.item }}"
-
+      command: >
+        sqlite3 /opt/flask_app/quiz.db
+        "INSERT INTO host (name, os_version, syslogs, packages)
+         VALUES ('{{ item }}', '{{ host_info.os_version }}', '{{ host_info.syslogs }}', '{{ host_info.packages }}');"
+      with_items: "{{ groups['all'] }}"
+      vars:
+        host_info:
+          os_version: "{{ os_version.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join(' ') }}"
+          syslogs: "{{ syslogs.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join(' ') }}"
+          packages: "{{ packages.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join(' ') }}"
+          
   handlers:
     - name: Restart Flask app service
       systemd:
