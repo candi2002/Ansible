@@ -136,24 +136,22 @@
     - name: Ensure SQLite database exists
       command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT, syslogs TEXT, packages TEXT);"
 
-    - name: Prepare data for insertion
+    - name: Prepare SQL for each host
       set_fact:
-        host_data: >-
+        host_sql: |
           INSERT INTO host (name, os_version, syslogs, packages)
-          VALUES ('{{ item }}',
-                  '{{ (os_version.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
-                  '{{ (syslogs.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
-                  '{{ (packages.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}');
+          VALUES (
+            '{{ item }}',
+            '{{ (os_version.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
+            '{{ (syslogs.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
+            '{{ (packages.results | selectattr('item', 'equalto', item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}'
+          );
 
       with_items: "{{ groups['all'] }}"
-      loop_control:
-        loop_var: item
 
     - name: Update database with host information
-      command: sqlite3 /opt/flask_app/quiz.db "{{ host_data }}"
+      command: sqlite3 /opt/flask_app/quiz.db "{{ host_sql }}"
       with_items: "{{ groups['all'] }}"
-      loop_control:
-        loop_var: item
 
   handlers:
     - name: Restart Flask app service
