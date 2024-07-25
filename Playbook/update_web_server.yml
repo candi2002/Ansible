@@ -150,8 +150,10 @@
       with_items: "{{ groups['all'] }}"
 
     - name: Update database with host information
-      command: sqlite3 /opt/flask_app/quiz.db "{{ host_sql }}"
-      with_items: "{{ groups['all'] }}"
+      command: "echo '{{ host_sql }}' | sqlite3 /opt/flask_app/quiz.db"
+      loop: "{{ groups['all'] }}"
+      loop_control:
+        loop_var: item
 
   handlers:
     - name: Restart Flask app service
