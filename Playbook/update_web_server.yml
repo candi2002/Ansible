@@ -3,6 +3,13 @@
   hosts: controller
   become: yes
   tasks:
+    - name: Ensure the Flask app working directory exists
+      file:
+        path: /opt/flask_app
+        state: directory
+        owner: root
+        group: www-data
+
     - name: Install SQLite3
       apt:
         name: sqlite3
@@ -39,32 +46,6 @@
           if __name__ == "__main__":
               db.create_all()
               app.run(host='0.0.0.0', port=5000)
-
-    - name: Ensure the Flask app service file is updated
-      copy:
-        dest: /etc/systemd/system/flask_app.service
-        content: |
-          [Unit]
-          Description=Gunicorn instance to serve flask_app
-          After=network.target
-
-          [Service]
-          User=root
-          Group=www-data
-          WorkingDirectory=/opt/flask_app
-          Environment="PATH=/opt/flask_app/venv/bin"
-          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 wsgi:app
-
-          [Install]
-          WantedBy=multi-user.target
-      notify: Restart Flask app service
-
-    - name: Ensure the Flask app working directory exists
-      file:
-        path: /opt/flask_app
-        state: directory
-        owner: root
-        group: www-data
 
     - name: Copy the Flask app templates
       copy:
@@ -115,6 +96,9 @@
         owner: root
         group: www-data
 
+    - name: Ensure SQLite database exists
+      command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT, syslogs TEXT, packages TEXT);"
+
     - name: Gather OS version
       command: uname -a
       register: os_version
@@ -133,9 +117,6 @@
       delegate_to: "{{ item }}"
       loop: "{{ groups['all'] }}"
 
-    - name: Ensure SQLite database exists
-      command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT, syslogs TEXT, packages TEXT);"
-
     - name: Prepare SQL for each host
       set_fact:
         host_sql: |
@@ -146,7 +127,6 @@
             '{{ (syslogs.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}',
             '{{ (packages.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}'
           );
-
       loop: "{{ groups['all'] }}"
 
     - name: Update database with host information
@@ -154,6 +134,25 @@
       loop: "{{ groups['all'] }}"
       loop_control:
         loop_var: item
+
+    - name: Ensure the Flask app service file is updated
+      copy:
+        dest: /etc/systemd/system/flask_app.service
+        content: |
+          [Unit]
+          Description=Gunicorn instance to serve flask_app
+          After=network.target
+
+          [Service]
+          User=root
+          Group=www-data
+          WorkingDirectory=/opt/flask_app
+          Environment="PATH=/opt/flask_app/venv/bin"
+          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 wsgi:app
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart Flask app service
 
   handlers:
     - name: Restart Flask app service
