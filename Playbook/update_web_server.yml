@@ -137,12 +137,17 @@
     - name: Ensure SQLite database exists
       command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT, syslogs TEXT, packages TEXT);"
 
+    - name: Prepare data for insertion
+      set_fact:
+        host_data: |
+          INSERT INTO host (name, os_version, syslogs, packages)
+          VALUES ('{{ item }}', '{{ os_version.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}', '{{ syslogs.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}', '{{ packages.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}');
+
     - name: Update database with host information
-      command: >
-        sqlite3 /opt/flask_app/quiz.db
-        "INSERT INTO host (name, os_version, syslogs, packages)
-         VALUES ('{{ item }}', '{{ os_version.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}', '{{ syslogs.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}', '{{ packages.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | join('') }}');"
+      command: sqlite3 /opt/flask_app/quiz.db "{{ host_data }}"
       with_items: "{{ groups['all'] }}"
+      loop_control:
+        loop_var: item
 
   handlers:
     - name: Restart Flask app service
