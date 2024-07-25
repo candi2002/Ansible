@@ -51,7 +51,7 @@
 
           @app.route('/')
           def home():
-              hosts = Host.query.all()
+              host = Host.query.all()
               template = '''
               <!doctype html>
               <html>
