@@ -25,7 +25,7 @@
       args:
         creates: /opt/flask_app/venv
 
-    - name: Install Flask in virtual environment
+    - name: Install Flask and Flask-SQLAlchemy in virtual environment
       command: /opt/flask_app/venv/bin/pip install Flask flask_sqlalchemy
 
     - name: Create the initial Flask app file
