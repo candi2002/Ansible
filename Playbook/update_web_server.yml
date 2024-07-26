@@ -25,8 +25,8 @@
       args:
         creates: /opt/flask_app/venv
 
-    - name: Install Flask and Flask-SQLAlchemy in virtual environment
-      command: /opt/flask_app/venv/bin/pip install Flask flask_sqlalchemy
+    - name: Install Flask, Flask-SQLAlchemy, and Gunicorn in virtual environment
+      command: /opt/flask_app/venv/bin/pip install Flask flask_sqlalchemy gunicorn
 
     - name: Install SQLite3
       apt:
@@ -97,14 +97,15 @@
         dest: /etc/systemd/system/flask_app.service
         content: |
           [Unit]
-          Description=Flask App
+          Description=Gunicorn instance to serve flask_app
           After=network.target
 
           [Service]
           User=candi
+          Group=www-data
           WorkingDirectory=/opt/flask_app
-          ExecStart=/opt/flask_app/venv/bin/python /opt/flask_app/app.py
-          Restart=always
+          Environment="PATH=/opt/flask_app/venv/bin"
+          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 app:app
 
           [Install]
           WantedBy=multi-user.target
@@ -134,7 +135,7 @@
       debug:
         msg: "{{ service_status.stdout }}"
 
-    - name: Ensure SQLite database exists
+    - name: Ensure SQLite database and table exist
       command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT);"
 
     - name: Gather OS version from each host
@@ -158,25 +159,6 @@
       loop: "{{ groups['controller'] }}"
       loop_control:
         loop_var: item
-
-    - name: Ensure the Flask app service file is updated
-      copy:
-        dest: /etc/systemd/system/flask_app.service
-        content: |
-          [Unit]
-          Description=Gunicorn instance to serve flask_app
-          After=network.target
-
-          [Service]
-          User=candi
-          Group=www-data
-          WorkingDirectory=/opt/flask_app
-          Environment="PATH=/opt/flask_app/venv/bin"
-          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 wsgi:app
-
-          [Install]
-          WantedBy=multi-user.target
-      notify: Restart Flask app service
 
   handlers:
     - name: Restart Flask app service
