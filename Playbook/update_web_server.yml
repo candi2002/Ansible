@@ -12,29 +12,6 @@
         - python3-venv
         - python3-pip
 
-    - name: Install MySQL server
-      apt:
-        name: mysql-server
-        state: present
-
-    - name: Start MySQL service
-      systemd:
-        name: mysql
-        state: started
-        enabled: yes
-
-    - name: Create MySQL database
-      mysql_db:
-        name: quizdb
-        state: present
-
-    - name: Create MySQL user
-      mysql_user:
-        name: quizuser
-        password: quizpassword
-        priv: 'quizdb.*:ALL'
-        state: present
-
     - name: Create Flask app directory
       file:
         path: /opt/flask_app
@@ -49,7 +26,12 @@
         creates: /opt/flask_app/venv
 
     - name: Install Flask and Flask-SQLAlchemy in virtual environment
-      command: /opt/flask_app/venv/bin/pip install Flask flask_sqlalchemy mysqlclient
+      command: /opt/flask_app/venv/bin/pip install Flask flask_sqlalchemy
+
+    - name: Install SQLite3
+      apt:
+        name: sqlite3
+        state: present
 
     - name: Create the initial Flask app file
       copy:
@@ -59,7 +41,7 @@
           from flask_sqlalchemy import SQLAlchemy
 
           app = Flask(__name__)
-          app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://quizuser:quizpassword@localhost/quizdb'
+          app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.db'
           db = SQLAlchemy(app)
 
           class Host(db.Model):
@@ -152,11 +134,14 @@
       debug:
         msg: "{{ service_status.stdout }}"
 
-    - name: Gather OS version
+    - name: Ensure SQLite database exists
+      command: sqlite3 /opt/flask_app/quiz.db "CREATE TABLE IF NOT EXISTS host (id INTEGER PRIMARY KEY, name TEXT, os_version TEXT);"
+
+    - name: Gather OS version from each host
       command: uname -a
       register: os_version
       delegate_to: "{{ item }}"
-      loop: "{{ groups['all'] }}"
+      loop: "{{ groups['controller'] }}"
 
     - name: Prepare SQL for each host
       set_fact:
@@ -166,11 +151,11 @@
             '{{ item }}',
             '{{ (os_version.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}'
           );
-      loop: "{{ groups['all'] }}"
+      loop: "{{ groups['controller'] }}"
 
     - name: Update database with host information
-      command: "mysql -uquizuser -pquizpassword -hlocalhost quizdb -e \"{{ host_sql }}\""
-      loop: "{{ groups['all'] }}"
+      command: "echo '{{ host_sql }}' | sqlite3 /opt/flask_app/quiz.db"
+      loop: "{{ groups['controller'] }}"
       loop_control:
         loop_var: item
 
