@@ -1,7 +1,7 @@
 ---
-- name: Create and serve a timetable HTML file
+- name: Create and serve a timetable HTML file with event addition feature
   hosts: controller
-  vars: 
+  vars:
     ansible_user: candi
   become: yes
   tasks:
@@ -18,7 +18,7 @@
         group: "{{ ansible_user }}"
         mode: '0755'
 
-    - name: Create the timetable HTML file
+    - name: Create the timetable HTML file with Add Event form
       copy:
         dest: /opt/timetable/timetable.html
         content: |
@@ -43,30 +43,36 @@
                   th {
                       background-color: #f2f2f2;
                   }
+                  form {
+                      margin: 20px 0;
+                  }
               </style>
           </head>
           <body>
               <h2>Thời Gian Biểu</h2>
-              <table>
-                  <tr>
-                      <th>Giờ/Ngày</th>
-                      <th>Thứ Hai</th>
-                      <th>Thứ Ba</th>
-                      <th>Thứ Tư</th>
-                      <th>Thứ Năm</th>
-                      <th>Thứ Sáu</th>
-                      <th>Thứ Bảy</th>
-                      <th>Chủ Nhật</th>
-                  </tr>
-                  {% for hour in range(0, 24) %}
-                  <tr>
-                      <td>{{ '%02d:00' % hour }}</td>
-                      {% for day in range(0, 7) %}
-                      <td></td>
+              <form action="/submit_event" method="post">
+                  <table>
+                      <tr>
+                          <th>Giờ/Ngày</th>
+                          <th>Thứ Hai</th>
+                          <th>Thứ Ba</th>
+                          <th>Thứ Tư</th>
+                          <th>Thứ Năm</th>
+                          <th>Thứ Sáu</th>
+                          <th>Thứ Bảy</th>
+                          <th>Chủ Nhật</th>
+                      </tr>
+                      {% for hour in range(0, 24) %}
+                      <tr>
+                          <td>{{ '%02d:00' % hour }}</td>
+                          {% for day in range(0, 7) %}
+                          <td><input type="text" name="entry_{{ hour }}_{{ day }}" /></td>
+                          {% endfor %}
+                      </tr>
                       {% endfor %}
-                  </tr>
-                  {% endfor %}
-              </table>
+                  </table>
+                  <input type="submit" value="Add Event">
+              </form>
           </body>
           </html>
 
