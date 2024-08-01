@@ -1,6 +1,6 @@
 ---
 - name: Create and serve a timetable HTML file
-  hosts: localhost
+  hosts: controller
   vars: 
     ansible_user: candi
   become: yes
