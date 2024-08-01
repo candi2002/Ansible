@@ -52,12 +52,6 @@
 
           @app.route('/')
           def home():
-              events = Event.query.all()
-              event_dict = {}
-              for event in events:
-                  key = f"{event.hour}_{event.day}"
-                  event_dict[key] = event.description
-
               template = '''
               <!doctype html>
               <html>
@@ -82,7 +76,7 @@
                           <tr>
                               <td>{{ '%02d:00' % hour }}</td>
                               {% for day in range(0, 7) %}
-                              <td><input type="text" name="entry_{{ hour }}_{{ day }}" value="{{ event_dict.get(f'{hour:02d}:00_{['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]}', '') }}" /></td>
+                              <td><input type="text" name="entry_{{ hour }}_{{ day }}" /></td>
                               {% endfor %}
                           </tr>
                           {% endfor %}
@@ -92,7 +86,7 @@
               </body>
               </html>
               '''
-              return render_template_string(template, event_dict=event_dict)
+              return render_template_string(template)
 
           @app.route('/submit_event', methods=['POST'])
           def submit_event():
@@ -101,12 +95,8 @@
                       entry = request.form.get(f'entry_{hour}_{day}')
                       if entry:
                           day_name = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]
-                          existing_event = Event.query.filter_by(hour=f'{hour:02d}:00', day=day_name).first()
-                          if existing_event:
-                              existing_event.description = entry
-                          else:
-                              new_event = Event(hour=f'{hour:02d}:00', day=day_name, description=entry)
-                              db.session.add(new_event)
+                          new_event = Event(hour=f'{hour:02d}:00', day=day_name, description=entry)
+                          db.session.add(new_event)
                           db.session.commit()
               return "Event added successfully"
 
@@ -159,6 +149,28 @@
 
     - name: Ensure SQLite database and table exist
       command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, hour TEXT, day TEXT, description TEXT);"
+
+    - name: Gather OS version from each host
+      command: uname -a
+      register: os_version
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['controller'] }}"
+
+    - name: Prepare SQL for each host
+      set_fact:
+        host_sql: |
+          INSERT INTO event (hour, day, description)
+          VALUES (
+            '{{ item }}',
+            '{{ (os_version.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}'
+          );
+      loop: "{{ groups['controller'] }}"
+
+    - name: Update database with host information
+      command: "echo '{{ host_sql }}' | sqlite3 /opt/flask_app/timetable.db"
+      loop: "{{ groups['controller'] }}"
+      loop_control:
+        loop_var: item
 
   handlers:
     - name: Restart Flask app service
