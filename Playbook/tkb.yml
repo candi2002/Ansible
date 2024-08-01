@@ -1,9 +1,15 @@
 ---
-- name: Create a timetable HTML file
-  hosts: controller
-  vars:
+- name: Create and serve a timetable HTML file
+  hosts: localhost
+  vars: 
     ansible_user: candi
+  become: yes
   tasks:
+    - name: Ensure Python is installed
+      apt:
+        name: python3
+        state: present
+
     - name: Create timetable directory
       file:
         path: /opt/timetable
@@ -61,3 +67,29 @@
               </table>
           </body>
           </html>
+
+    - name: Create a systemd service to serve the timetable
+      copy:
+        dest: /etc/systemd/system/timetable.service
+        content: |
+          [Unit]
+          Description=Serve timetable HTML file
+          After=network.target
+
+          [Service]
+          ExecStart=/usr/bin/python3 -m http.server 8000 --directory /opt/timetable
+          WorkingDirectory=/opt/timetable
+          Restart=always
+          User=root
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd to apply changes
+      command: systemctl daemon-reload
+
+    - name: Enable and start the timetable service
+      systemd:
+        name: timetable
+        state: started
+        enabled: yes
