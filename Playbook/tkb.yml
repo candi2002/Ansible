@@ -87,7 +87,7 @@
                           </tr>
                           {% endfor %}
                       </table>
-                      <input type="submit" value="Add Event" />
+                      <input type="submit" value="Add Event">
                   </form>
               </body>
               </html>
