@@ -1,9 +1,9 @@
----
+ ---
 - name: Create and serve a timetable HTML file
-  hosts: controller
+  hosts: localhost
+  become: yes
   vars: 
     ansible_user: candi
-  become: yes
   tasks:
     - name: Ensure Python is installed
       apt:
@@ -23,8 +23,10 @@
         dest: /opt/timetable/timetable.html
         content: |
           <!DOCTYPE html>
-          <html>
+          <html lang="vi">
           <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>Thời Gian Biểu</title>
               <style>
                   table {
@@ -77,7 +79,7 @@
           After=network.target
 
           [Service]
-          ExecStart=/usr/bin/python3 -m http.server 8000 --directory /opt/timetable
+          ExecStart=/usr/bin/python3 -m http.server 80 --directory /opt/timetable
           WorkingDirectory=/opt/timetable
           Restart=always
           User=root
