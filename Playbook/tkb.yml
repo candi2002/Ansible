@@ -79,7 +79,7 @@
           After=network.target
 
           [Service]
-          ExecStart=/usr/bin/python3 -m http.server 80 --directory /opt/timetable
+          ExecStart=/usr/bin/python3 -m http.server 8000 --directory /opt/timetable
           WorkingDirectory=/opt/timetable
           Restart=always
           User=root
