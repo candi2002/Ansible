@@ -1,5 +1,5 @@
 ---
-- name: Create and serve a timetable HTML file with event addition feature
+- name: Create and serve a timetable HTML file with editable table
   hosts: controller
   vars:
     ansible_user: candi
@@ -18,7 +18,7 @@
         group: "{{ ansible_user }}"
         mode: '0755'
 
-    - name: Create the timetable HTML file with Add Event form
+    - name: Create the timetable HTML file with editable table
       copy:
         dest: /opt/timetable/timetable.html
         content: |
@@ -43,36 +43,71 @@
                   th {
                       background-color: #f2f2f2;
                   }
-                  form {
-                      margin: 20px 0;
+                  .editable {
+                      cursor: pointer;
+                      background-color: #f9f9f9;
+                  }
+                  .editable:focus {
+                      outline: 2px solid #007bff;
                   }
               </style>
+              <script>
+                  function makeEditable(cell) {
+                      cell.contentEditable = true;
+                      cell.focus();
+                  }
+
+                  function saveData() {
+                      const table = document.querySelector('table');
+                      const rows = table.querySelectorAll('tr');
+                      const data = {};
+
+                      rows.forEach((row, rowIndex) => {
+                          const cells = row.querySelectorAll('td');
+                          cells.forEach((cell, cellIndex) => {
+                              if (cell.contentEditable === "true") {
+                                  const hour = rowIndex;
+                                  const day = cellIndex;
+                                  const value = cell.innerText;
+                                  data[`entry_${hour}_${day}`] = value;
+                              }
+                          });
+                      });
+
+                      fetch('/submit_event', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          body: JSON.stringify(data)
+                      }).then(response => response.text())
+                        .then(result => alert(result));
+                  }
+              </script>
           </head>
           <body>
               <h2>Thời Gian Biểu</h2>
-              <form action="/submit_event" method="post">
-                  <table>
-                      <tr>
-                          <th>Giờ/Ngày</th>
-                          <th>Thứ Hai</th>
-                          <th>Thứ Ba</th>
-                          <th>Thứ Tư</th>
-                          <th>Thứ Năm</th>
-                          <th>Thứ Sáu</th>
-                          <th>Thứ Bảy</th>
-                          <th>Chủ Nhật</th>
-                      </tr>
-                      {% for hour in range(0, 24) %}
-                      <tr>
-                          <td>{{ '%02d:00' % hour }}</td>
-                          {% for day in range(0, 7) %}
-                          <td><input type="text" name="entry_{{ hour }}_{{ day }}" /></td>
-                          {% endfor %}
-                      </tr>
+              <table>
+                  <tr>
+                      <th>Giờ/Ngày</th>
+                      <th>Thứ Hai</th>
+                      <th>Thứ Ba</th>
+                      <th>Thứ Tư</th>
+                      <th>Thứ Năm</th>
+                      <th>Thứ Sáu</th>
+                      <th>Thứ Bảy</th>
+                      <th>Chủ Nhật</th>
+                  </tr>
+                  {% for hour in range(0, 24) %}
+                  <tr>
+                      <td>{{ '%02d:00' % hour }}</td>
+                      {% for day in range(0, 7) %}
+                      <td class="editable" onclick="makeEditable(this)"></td>
                       {% endfor %}
-                  </table>
-                  <input type="submit" value="Add Event">
-              </form>
+                  </tr>
+                  {% endfor %}
+              </table>
+              <button onclick="saveData()">Save Changes</button>
           </body>
           </html>
 
