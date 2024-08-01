@@ -1,0 +1,61 @@
+---
+- name: Create a timetable HTML file
+  hosts: localhost
+  tasks:
+    - name: Create timetable directory
+      file:
+        path: /opt/timetable
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Create the timetable HTML file
+      copy:
+        dest: /opt/timetable/timetable.html
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Thời Gian Biểu</title>
+              <style>
+                  table {
+                      width: 100%;
+                      border-collapse: collapse;
+                  }
+                  table, th, td {
+                      border: 1px solid black;
+                  }
+                  th, td {
+                      padding: 10px;
+                      text-align: center;
+                  }
+                  th {
+                      background-color: #f2f2f2;
+                  }
+              </style>
+          </head>
+          <body>
+              <h2>Thời Gian Biểu</h2>
+              <table>
+                  <tr>
+                      <th>Giờ/Ngày</th>
+                      <th>Thứ Hai</th>
+                      <th>Thứ Ba</th>
+                      <th>Thứ Tư</th>
+                      <th>Thứ Năm</th>
+                      <th>Thứ Sáu</th>
+                      <th>Thứ Bảy</th>
+                      <th>Chủ Nhật</th>
+                  </tr>
+                  {% for hour in range(0, 24) %}
+                  <tr>
+                      <td>{{ '%02d:00' % hour }}</td>
+                      {% for day in range(0, 7) %}
+                      <td></td>
+                      {% endfor %}
+                  </tr>
+                  {% endfor %}
+              </table>
+          </body>
+          </html>
