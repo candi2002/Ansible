@@ -1,4 +1,4 @@
- ---
+---
 - name: Create and serve a timetable HTML file
   hosts: localhost
   become: yes
