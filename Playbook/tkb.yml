@@ -1,88 +1,123 @@
 ---
-- name: Create and serve a timetable HTML file
+- name: Create and serve a timetable HTML file with event addition feature
   hosts: controller
   become: yes
   vars: 
     ansible_user: candi
   tasks:
-    - name: Ensure Python is installed
+    - name: Ensure Python and required packages are installed
       apt:
-        name: python3
+        name: "{{ item }}"
         state: present
+      loop:
+        - python3
+        - python3-venv
+        - python3-pip
+        - sqlite3
 
-    - name: Create timetable directory
+    - name: Create Flask app directory
       file:
-        path: /opt/timetable
+        path: /opt/flask_app
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: '0755'
 
-    - name: Create the timetable HTML file
-      copy:
-        dest: /opt/timetable/timetable.html
-        content: |
-          <!DOCTYPE html>
-          <html lang="vi">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Thời Gian Biểu</title>
-              <style>
-                  table {
-                      width: 100%;
-                      border-collapse: collapse;
-                  }
-                  table, th, td {
-                      border: 1px solid black;
-                  }
-                  th, td {
-                      padding: 10px;
-                      text-align: center;
-                  }
-                  th {
-                      background-color: #f2f2f2;
-                  }
-              </style>
-          </head>
-          <body>
-              <h2>Thời Gian Biểu</h2>
-              <table>
-                  <tr>
-                      <th>Giờ/Ngày</th>
-                      <th>Thứ Hai</th>
-                      <th>Thứ Ba</th>
-                      <th>Thứ Tư</th>
-                      <th>Thứ Năm</th>
-                      <th>Thứ Sáu</th>
-                      <th>Thứ Bảy</th>
-                      <th>Chủ Nhật</th>
-                  </tr>
-                  {% for hour in range(0, 24) %}
-                  <tr>
-                      <td>{{ '%02d:00' % hour }}</td>
-                      {% for day in range(0, 7) %}
-                      <td></td>
-                      {% endfor %}
-                  </tr>
-                  {% endfor %}
-              </table>
-          </body>
-          </html>
+    - name: Create virtual environment
+      command: python3 -m venv /opt/flask_app/venv
+      args:
+        creates: /opt/flask_app/venv
 
-    - name: Create a systemd service to serve the timetable
+    - name: Install Flask and required libraries in virtual environment
+      command: /opt/flask_app/venv/bin/pip install Flask flask_sqlalchemy gunicorn
+      args:
+        creates: /opt/flask_app/venv/bin/pip
+
+    - name: Create the Flask app file
       copy:
-        dest: /etc/systemd/system/timetable.service
+        dest: /opt/flask_app/app.py
+        content: |
+          from flask import Flask, render_template_string, request
+          from flask_sqlalchemy import SQLAlchemy
+
+          app = Flask(__name__)
+          app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///timetable.db'
+          db = SQLAlchemy(app)
+
+          class Event(db.Model):
+              id = db.Column(db.Integer, primary_key=True)
+              hour = db.Column(db.String(10), nullable=False)
+              day = db.Column(db.String(10), nullable=False)
+              description = db.Column(db.String(200), nullable=True)
+
+          @app.route('/')
+          def home():
+              template = '''
+              <!doctype html>
+              <html>
+              <head>
+                  <title>Timetable</title>
+              </head>
+              <body>
+                  <h1>Timetable</h1>
+                  <form action="/submit_event" method="post">
+                      <table>
+                          <tr>
+                              <th>Hour/Day</th>
+                              <th>Monday</th>
+                              <th>Tuesday</th>
+                              <th>Wednesday</th>
+                              <th>Thursday</th>
+                              <th>Friday</th>
+                              <th>Saturday</th>
+                              <th>Sunday</th>
+                          </tr>
+                          {% for hour in range(0, 24) %}
+                          <tr>
+                              <td>{{ '%02d:00' % hour }}</td>
+                              {% for day in range(0, 7) %}
+                              <td><input type="text" name="entry_{{ hour }}_{{ day }}" /></td>
+                              {% endfor %}
+                          </tr>
+                          {% endfor %}
+                      </table>
+                      <input type="submit" value="Add Event">
+                  </form>
+              </body>
+              </html>
+              '''
+              return render_template_string(template)
+
+          @app.route('/submit_event', methods=['POST'])
+          def submit_event():
+              for hour in range(0, 24):
+                  for day in range(0, 7):
+                      entry = request.form.get(f'entry_{hour}_{day}')
+                      if entry:
+                          day_name = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]
+                          new_event = Event(hour=f'{hour:02d}:00', day=day_name, description=entry)
+                          db.session.add(new_event)
+                          db.session.commit()
+              return "Event added successfully"
+
+          if __name__ == "__main__":
+              db.create_all()
+              app.run(host='0.0.0.0', port=5000)
+
+    - name: Create systemd service for Flask app
+      copy:
+        dest: /etc/systemd/system/flask_app.service
         content: |
           [Unit]
-          Description=Serve timetable HTML file
+          Description=Gunicorn instance to serve Flask app
           After=network.target
 
           [Service]
-          ExecStart=/usr/bin/python3 -m http.server 8000 --directory /opt/timetable
-          WorkingDirectory=/opt/timetable
-          Restart=always
-          User=root
+          User={{ ansible_user }}
+          Group=www-data
+          WorkingDirectory=/opt/flask_app
+          Environment="PATH=/opt/flask_app/venv/bin"
+          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 app:app
 
           [Install]
           WantedBy=multi-user.target
@@ -90,8 +125,56 @@
     - name: Reload systemd to apply changes
       command: systemctl daemon-reload
 
-    - name: Enable and start the timetable service
+    - name: Enable and start Flask app service
       systemd:
-        name: timetable
+        name: flask_app
         state: started
+        enabled: yes
+
+    - name: Open port 5000 on the firewall
+      ufw:
+        rule: allow
+        port: 5000
+        proto: tcp
+        comment: "Allow Flask web server traffic on port 5000"
+
+    - name: Check Flask app service status
+      shell: systemctl status flask_app
+      register: service_status
+      ignore_errors: yes
+
+    - name: Debug service status
+      debug:
+        msg: "{{ service_status.stdout }}"
+
+    - name: Ensure SQLite database and table exist
+      command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, hour TEXT, day TEXT, description TEXT);"
+
+    - name: Gather OS version from each host
+      command: uname -a
+      register: os_version
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['controller'] }}"
+
+    - name: Prepare SQL for each host
+      set_fact:
+        host_sql: |
+          INSERT INTO event (hour, day, description)
+          VALUES (
+            '{{ item }}',
+            '{{ (os_version.results | selectattr("item", "equalto", item) | first).stdout | regex_replace("'", "''") | regex_replace("\n", " ") }}'
+          );
+      loop: "{{ groups['controller'] }}"
+
+    - name: Update database with host information
+      command: "echo '{{ host_sql }}' | sqlite3 /opt/flask_app/timetable.db"
+      loop: "{{ groups['controller'] }}"
+      loop_control:
+        loop_var: item
+
+  handlers:
+    - name: Restart Flask app service
+      systemd:
+        name: flask_app
+        state: restarted
         enabled: yes
