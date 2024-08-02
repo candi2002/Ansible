@@ -1,11 +1,9 @@
 ---
-- name: Tạo và phục vụ tệp HTML lịch trình với tính năng thêm sự kiện từ file txt
+- name: Cài đặt và cấu hình ứng dụng Flask với khả năng cập nhật sự kiện
   hosts: controller
   become: yes
-  vars: 
+  vars:
     ansible_user: candi
-    file_path: /opt/ansible/semaphore/Playbook/events.txt  # Đường dẫn đến file chứa dữ liệu
-
   tasks:
     - name: Đảm bảo Python và các gói cần thiết được cài đặt
       apt:
@@ -152,58 +150,82 @@
                       day_name = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'][int(day)]
                       new_event = Event(period=period, day=day_name, description=value)
                       db.session.add(new_event)
-                      db.session.commit()
+                  db.session.commit()
                   return jsonify(message="Sự kiện đã được thêm thành công")
               return jsonify(message="Yêu cầu không hợp lệ")
+
+          @app.route('/update_events', methods=['POST'])
+          def update_events():
+              file_path = request.form.get('file_path')
+              if file_path and os.path.isfile(file_path):
+                  try:
+                      with open(file_path, 'r') as file:
+                          for line in file:
+                              parts = line.strip().split(' - ')
+                              if len(parts) == 3:
+                                  description, period, day = parts
+                                  day_name = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'][int(day)]
+                                  new_event = Event(period=period, day=day_name, description=description)
+                                  db.session.add(new_event)
+                          db.session.commit()
+                      return jsonify(message="Cập nhật sự kiện thành công từ file")
+                  except Exception as e:
+                      return jsonify(message=f"Lỗi khi cập nhật sự kiện: {str(e)}"), 500
+              return jsonify(message="File không hợp lệ hoặc không tồn tại"), 400
 
           if __name__ == "__main__":
               db.create_all()
               app.run(host='0.0.0.0', port=5000)
-
-    - name: Tạo tệp update_events.py để cập nhật sự kiện từ file txt
+    
+    - name: Tạo dịch vụ systemd cho ứng dụng Flask
       copy:
-        dest: /opt/flask_app/update_events.py
+        dest: /etc/systemd/system/flask_app.service
         content: |
-          import argparse
-          from app import db, Event
+          [Unit]
+          Description=Gunicorn instance to serve Flask app
+          After=network.target
 
-          def update_events(file_path):
-              with open(file_path, 'r') as file:
-                  for line in file:
-                      parts = line.strip().split(' - ')
-                      if len(parts) == 3:
-                          description, period, day = parts
-                          day_name = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'][int(day)]
-                          new_event = Event(period=period, day=day_name, description=description)
-                          db.session.add(new_event)
-                  db.session.commit()
+          [Service]
+          User={{ ansible_user }}
+          Group=www-data
+          WorkingDirectory=/opt/flask_app
+          Environment="PATH=/opt/flask_app/venv/bin"
+          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 app:app
 
-          if __name__ == "__main__":
-              parser = argparse.ArgumentParser(description='Update events from a text file.')
-              parser.add_argument('--file', required=True, help='Path to the events file.')
-              args = parser.parse_args()
-              update_events(args.file)
-        
-    - name: Tạo nội dung mẫu cho file events.txt
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Tải lại systemd để áp dụng thay đổi
+      command: systemctl daemon-reload
+
+    - name: Kích hoạt và khởi động dịch vụ ứng dụng Flask
+      systemd:
+        name: flask_app
+        state: started
+        enabled: yes
+
+    - name: Mở cổng 8000 trên tường lửa
+      ufw:
+        rule: allow
+        port: 8000
+        proto: tcp
+        comment: "Cho phép lưu lượng web Flask trên cổng 8000"
+
+    - name: Đảm bảo cơ sở dữ liệu SQLite và bảng tồn tại
+      command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, period TEXT, day TEXT, description TEXT);"
+
+    - name: Tạo file sự kiện mẫu
       copy:
-        dest: "{{ file_path }}"
+        dest: /opt/flask_app/events.txt
         content: |
-          Toán - 1 - 0
-          Lý - 2 - 1
-          Hóa - 3 - 2
-          Sinh - 4 - 3
-          Văn - 5 - 4
-          Sử - 6 - 5
-          Địa - 7 - 6
-          Anh - 8 - 0
-          Thể dục - 9 - 1
-          Tin học - 10 - 2
-          Nghệ thuật - 11 - 3
-          Âm nhạc - 12 - 4
+          Meeting - 1 - 0
+          Workshop - 2 - 1
+          Seminar - 3 - 2
 
-    - name: Đọc nội dung từ file txt và cập nhật vào cơ sở dữ liệu
-      command: |
-        python3 /opt/flask_app/update_events.py --file {{ file_path }}
+    - name: Cập nhật sự kiện từ file
+      command: python3 /opt/flask_app/app.py --file /opt/flask_app/events.txt
+      args:
+        chdir: /opt/flask_app
 
     - name: Kiểm tra trạng thái dịch vụ Flask
       shell: systemctl status flask_app
