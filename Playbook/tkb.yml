@@ -115,7 +115,7 @@
                               const cells = row.querySelectorAll('td');
                               cells.forEach((cell, cellIndex) => {
                                   if (cell.contentEditable === "true") {
-                                      const hour = rowIndex + 6; // Điều chỉnh để bắt đầu từ 6 AM
+                                      const hour = rowIndex + 6; // Adjust for 6 AM start
                                       const day = cellIndex;
                                       const value = cell.innerText;
                                       data[`entry_${hour}_${day}`] = value;
@@ -153,7 +153,7 @@
 
           if __name__ == "__main__":
               db.create_all()
-              app.run(host='0.0.0.0', port=8000)
+              app.run(host='0.0.0.0', port=5000)  # Chạy trên cổng 5000
 
     - name: Tạo dịch vụ systemd cho ứng dụng Flask
       copy:
@@ -187,10 +187,48 @@
         rule: allow
         port: 8000
         proto: tcp
-        comment: "Cho phép lưu lượng web Flask trên cổng 8000"
+        comment: "Cho phép lưu lượng web Nginx trên cổng 8000"
 
     - name: Đảm bảo cơ sở dữ liệu SQLite và bảng tồn tại
       command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, hour TEXT, day TEXT, description TEXT);"
+
+    - name: Cài đặt Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Xóa cấu hình trang mặc định của Nginx
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Tạo cấu hình Nginx cho ứng dụng Flask
+      copy:
+        dest: /etc/nginx/sites-available/flask_app
+        content: |
+          server {
+              listen 8000;
+              server_name ledominh.thong;  # Giữ nguyên tên miền
+
+              location / {
+                  proxy_pass http://127.0.0.1:5000;  # Chuyển tiếp đến ứng dụng Flask trên cổng 5000
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+              }
+          }
+
+    - name: Kích hoạt cấu hình trang web của Nginx
+      file:
+        src: /etc/nginx/sites-available/flask_app
+        dest: /etc/nginx/sites-enabled/flask_app
+        state: link
+
+    - name: Khởi động lại Nginx để áp dụng cấu hình
+      service:
+        name: nginx
+        state: restarted
 
     - name: Kiểm tra trạng thái dịch vụ Flask
       shell: systemctl status flask_app
