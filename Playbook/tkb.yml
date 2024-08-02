@@ -115,7 +115,7 @@
                               const cells = row.querySelectorAll('td');
                               cells.forEach((cell, cellIndex) => {
                                   if (cell.contentEditable === "true") {
-                                      const hour = rowIndex + 6; // Adjust for 6 AM start
+                                      const hour = rowIndex + 6; // Điều chỉnh để bắt đầu từ 6 AM
                                       const day = cellIndex;
                                       const value = cell.innerText;
                                       data[`entry_${hour}_${day}`] = value;
