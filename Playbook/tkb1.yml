@@ -192,7 +192,7 @@
         dest: /etc/nginx/sites-available/flask_app
         content: |
           server {
-              listen 80;
+              listen 8000;
               server_name phimmoi1.com;
 
               location / {
@@ -214,10 +214,10 @@
         path: /etc/nginx/sites-enabled/default
         state: absent
 
-    - name: Open port 80 on the firewall
+    - name: Open port 8000 on the firewall
       ufw:
         rule: allow
-        port: 80
+        port: 8000
         proto: tcp
         comment: "Allow HTTP traffic"
 
