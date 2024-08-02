@@ -197,6 +197,23 @@
     - name: Đảm bảo cơ sở dữ liệu SQLite và bảng tồn tại
       command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, period TEXT, day TEXT, description TEXT);"
 
+    - name: Tạo nội dung mẫu cho file events.txt
+      copy:
+        dest: "{{ file_path }}"
+        content: |
+          Toán - 1 - 0
+          Lý - 2 - 1
+          Hóa - 3 - 2
+          Sinh - 4 - 3
+          Văn - 5 - 4
+          Sử - 6 - 5
+          Địa - 7 - 6
+          Anh - 8 - 0
+          Thể dục - 9 - 1
+          Tin học - 10 - 2
+          Nghệ thuật - 11 - 3
+          Âm nhạc - 12 - 4
+
     - name: Đọc nội dung từ file txt và cập nhật vào cơ sở dữ liệu
       command: |
         python3 /opt/flask_app/update_events.py --file {{ file_path }}
