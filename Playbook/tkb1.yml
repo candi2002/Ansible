@@ -168,7 +168,7 @@
           Group=www-data
           WorkingDirectory=/opt/flask_app
           Environment="PATH=/opt/flask_app/venv/bin"
-          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:/opt/flask_app/flask_app.sock -m 007 app:app
+          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 app:app
 
           [Install]
           WantedBy=multi-user.target
@@ -182,56 +182,65 @@
         state: started
         enabled: yes
 
+    - name: Open port 5000 on the firewall
+      ufw:
+        rule: allow
+        port: 5000
+        proto: tcp
+        comment: "Allow Flask web server traffic on port 5000"
+
+    - name: Ensure SQLite database and table exist
+      command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, hour TEXT, day TEXT, description TEXT);"
+
+    - name: Check Flask app service status
+      shell: systemctl status flask_app
+      register: service_status
+      ignore_errors: yes
+
+    - name: Debug service status
+      debug:
+        msg: "{{ service_status.stdout }}"
+
     - name: Install Nginx
       apt:
         name: nginx
         state: present
 
-    - name: Configure Nginx to proxy requests to Gunicorn
+    - name: Remove default Nginx site configuration
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Create Nginx configuration for Flask app
       copy:
         dest: /etc/nginx/sites-available/flask_app
         content: |
           server {
-              listen 8000;
-              server_name phimmoi1.com;
+              listen 80;
+              server_name phimmoi.net;
 
               location / {
-                  include proxy_params;
                   proxy_pass http://unix:/opt/flask_app/flask_app.sock;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
               }
           }
-      notify:
-        - Restart Nginx
 
-    - name: Enable the Nginx site configuration
+    - name: Enable Nginx site configuration
       file:
         src: /etc/nginx/sites-available/flask_app
         dest: /etc/nginx/sites-enabled/flask_app
         state: link
 
-    - name: Remove the default Nginx site configuration
-      file:
-        path: /etc/nginx/sites-enabled/default
-        state: absent
+    - name: Test Nginx configuration
+      command: nginx -t
+      register: nginx_test
+      ignore_errors: yes
 
-    - name: Open port 8000 on the firewall
-      ufw:
-        rule: allow
-        port: 8000
-        proto: tcp
-        comment: "Allow HTTP traffic"
-
-    - name: Ensure SQLite database and table exist
-      command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, hour TEXT, day TEXT, description TEXT);"
-
-  handlers:
-    - name: Restart Flask app service
-      systemd:
-        name: flask_app
-        state: restarted
-        enabled: yes
-
-    - name: Restart Nginx
+    - name: Reload Nginx
       service:
         name: nginx
-        state: restarted
+        state: reloaded
+      when: nginx_test.rc == 0
