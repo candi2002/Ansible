@@ -217,7 +217,7 @@
         content: |
           server {
               listen 80;
-              server_name phimmoi.net;
+              server_name ledominh.thong;
 
               location / {
                   proxy_pass http://unix:/opt/flask_app/flask_app.sock;
