@@ -4,7 +4,7 @@
   become: yes
   vars: 
     ansible_user: candi
-    file_path: /opt/flask_app/events.txt  # Đường dẫn đến file chứa dữ liệu
+    file_path: /opt/ansible/semaphore/Playbook/events.txt  # Đường dẫn đến file chứa dữ liệu
 
   tasks:
     - name: Đảm bảo Python và các gói cần thiết được cài đặt
