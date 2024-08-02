@@ -206,7 +206,7 @@
     - name: Enable the Nginx site configuration
       file:
         src: /etc/nginx/sites-available/flask_app
-        dest: /etc/nginx/sites-enabled/
+        dest: /etc/nginx/sites-enabled/flask_app
         state: link
 
     - name: Remove the default Nginx site configuration
