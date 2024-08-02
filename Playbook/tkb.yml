@@ -160,43 +160,30 @@
               db.create_all()
               app.run(host='0.0.0.0', port=5000)
 
-    - name: Tạo dịch vụ systemd cho ứng dụng Flask
+    - name: Tạo tệp update_events.py để cập nhật sự kiện từ file txt
       copy:
-        dest: /etc/systemd/system/flask_app.service
+        dest: /opt/flask_app/update_events.py
         content: |
-          [Unit]
-          Description=Gunicorn instance to serve Flask app
-          After=network.target
+          import argparse
+          from app import db, Event
 
-          [Service]
-          User={{ ansible_user }}
-          Group=www-data
-          WorkingDirectory=/opt/flask_app
-          Environment="PATH=/opt/flask_app/venv/bin"
-          ExecStart=/opt/flask_app/venv/bin/gunicorn --workers 3 --bind unix:flask_app.sock -m 007 app:app
+          def update_events(file_path):
+              with open(file_path, 'r') as file:
+                  for line in file:
+                      parts = line.strip().split(' - ')
+                      if len(parts) == 3:
+                          description, period, day = parts
+                          day_name = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'][int(day)]
+                          new_event = Event(period=period, day=day_name, description=description)
+                          db.session.add(new_event)
+                  db.session.commit()
 
-          [Install]
-          WantedBy=multi-user.target
-
-    - name: Tải lại systemd để áp dụng thay đổi
-      command: systemctl daemon-reload
-
-    - name: Kích hoạt và khởi động dịch vụ ứng dụng Flask
-      systemd:
-        name: flask_app
-        state: started
-        enabled: yes
-
-    - name: Mở cổng 5000 trên tường lửa
-      ufw:
-        rule: allow
-        port: 5000
-        proto: tcp
-        comment: "Cho phép lưu lượng web Flask trên cổng 5000"
-
-    - name: Đảm bảo cơ sở dữ liệu SQLite và bảng tồn tại
-      command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, period TEXT, day TEXT, description TEXT);"
-
+          if __name__ == "__main__":
+              parser = argparse.ArgumentParser(description='Update events from a text file.')
+              parser.add_argument('--file', required=True, help='Path to the events file.')
+              args = parser.parse_args()
+              update_events(args.file)
+        
     - name: Tạo nội dung mẫu cho file events.txt
       copy:
         dest: "{{ file_path }}"
