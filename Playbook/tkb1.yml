@@ -193,7 +193,7 @@
         content: |
           server {
               listen 80;
-              server_name yourdomain.com;
+              server_name phimmoi1.com;
 
               location / {
                   include proxy_params;
