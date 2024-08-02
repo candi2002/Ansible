@@ -1,11 +1,11 @@
 ---
-- name: Create and serve a timetable HTML file with event addition feature
+- name: Tạo và phục vụ tệp HTML lịch trình với tính năng thêm sự kiện
   hosts: controller
   become: yes
   vars: 
     ansible_user: candi
   tasks:
-    - name: Ensure Python and required packages are installed
+    - name: Đảm bảo Python và các gói cần thiết được cài đặt
       apt:
         name: "{{ item }}"
         state: present
@@ -15,7 +15,7 @@
         - python3-pip
         - sqlite3
 
-    - name: Create Flask app directory
+    - name: Tạo thư mục ứng dụng Flask
       file:
         path: /opt/flask_app
         state: directory
@@ -23,17 +23,17 @@
         group: "{{ ansible_user }}"
         mode: '0755'
 
-    - name: Create virtual environment
+    - name: Tạo môi trường ảo
       command: python3 -m venv /opt/flask_app/venv
       args:
         creates: /opt/flask_app/venv
 
-    - name: Install Flask and required libraries in virtual environment
+    - name: Cài đặt Flask và các thư viện cần thiết trong môi trường ảo
       command: /opt/flask_app/venv/bin/pip install Flask flask_sqlalchemy gunicorn
       args:
         creates: /opt/flask_app/venv/bin/pip
 
-    - name: Create the Flask app file
+    - name: Tạo tệp ứng dụng Flask
       copy:
         dest: /opt/flask_app/app.py
         content: |
@@ -81,16 +81,16 @@
                   <h1>Timetable</h1>
                   <table>
                       <tr>
-                          <th>Hour/Day</th>
-                          <th>Monday</th>
-                          <th>Tuesday</th>
-                          <th>Wednesday</th>
-                          <th>Thursday</th>
-                          <th>Friday</th>
-                          <th>Saturday</th>
-                          <th>Sunday</th>
+                          <th>Tiết/Ngày</th>
+                          <th>Thứ Hai</th>
+                          <th>Thứ Ba</th>
+                          <th>Thứ Tư</th>
+                          <th>Thứ Năm</th>
+                          <th>Thứ Sáu</th>
+                          <th>Thứ Bảy</th>
+                          <th>Chủ Nhật</th>
                       </tr>
-                      {% for hour in range(0, 24) %}
+                      {% for hour in range(6, 24) %}
                       <tr>
                           <td>{{ '%02d:00' % hour }}</td>
                           {% for day in range(0, 7) %}
@@ -99,7 +99,7 @@
                       </tr>
                       {% endfor %}
                   </table>
-                  <button onclick="saveData()">Save Changes</button>
+                  <button onclick="saveData()">Lưu Thay Đổi</button>
                   <script>
                       function makeEditable(cell) {
                           cell.contentEditable = true;
@@ -115,7 +115,7 @@
                               const cells = row.querySelectorAll('td');
                               cells.forEach((cell, cellIndex) => {
                                   if (cell.contentEditable === "true") {
-                                      const hour = rowIndex;
+                                      const hour = rowIndex + 6; // Adjust for 6 AM start
                                       const day = cellIndex;
                                       const value = cell.innerText;
                                       data[`entry_${hour}_${day}`] = value;
@@ -144,18 +144,18 @@
                   data = request.get_json()
                   for key, value in data.items():
                       hour, day = key.split('_')[1:3]
-                      day_name = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][int(day)]
+                      day_name = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'][int(day)]
                       new_event = Event(hour=f'{hour}:00', day=day_name, description=value)
                       db.session.add(new_event)
                       db.session.commit()
-                  return jsonify(message="Events added successfully")
-              return jsonify(message="Invalid request")
+                  return jsonify(message="Sự kiện đã được thêm thành công")
+              return jsonify(message="Yêu cầu không hợp lệ")
 
           if __name__ == "__main__":
               db.create_all()
-              app.run(host='0.0.0.0', port=5000)
+              app.run(host='0.0.0.0', port=8000)
 
-    - name: Create systemd service for Flask app
+    - name: Tạo dịch vụ systemd cho ứng dụng Flask
       copy:
         dest: /etc/systemd/system/flask_app.service
         content: |
@@ -173,30 +173,30 @@
           [Install]
           WantedBy=multi-user.target
 
-    - name: Reload systemd to apply changes
+    - name: Tải lại systemd để áp dụng thay đổi
       command: systemctl daemon-reload
 
-    - name: Enable and start Flask app service
+    - name: Kích hoạt và khởi động dịch vụ ứng dụng Flask
       systemd:
         name: flask_app
         state: started
         enabled: yes
 
-    - name: Open port 5000 on the firewall
+    - name: Mở cổng 8000 trên tường lửa
       ufw:
         rule: allow
-        port: 5000
+        port: 8000
         proto: tcp
-        comment: "Allow Flask web server traffic on port 5000"
+        comment: "Cho phép lưu lượng web Flask trên cổng 8000"
 
-    - name: Ensure SQLite database and table exist
+    - name: Đảm bảo cơ sở dữ liệu SQLite và bảng tồn tại
       command: sqlite3 /opt/flask_app/timetable.db "CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY, hour TEXT, day TEXT, description TEXT);"
 
-    - name: Check Flask app service status
+    - name: Kiểm tra trạng thái dịch vụ Flask
       shell: systemctl status flask_app
       register: service_status
       ignore_errors: yes
 
-    - name: Debug service status
+    - name: Gỡ lỗi trạng thái dịch vụ
       debug:
         msg: "{{ service_status.stdout }}"
