@@ -2,3 +2,7 @@
 192.168.9.165 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
 [host]
 192.168.9.158 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
+[windows]
+192.168.9.139 ansible_user=letho ansible_password=candi ansible_connection=ssh ansible_port=22
+ 
+
