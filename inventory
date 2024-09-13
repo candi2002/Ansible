@@ -1,5 +1,5 @@
 [controller]
-192.168.9.113 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
+192.168.9.134 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
 
 [host]
 192.168.9.158 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
