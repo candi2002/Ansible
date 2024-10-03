@@ -1,0 +1,4 @@
+lines of code: 110
+tested time: 0:00:00.015626
+total number of funtions: 8
+
