@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/opt/ansible/semaphore/ramonus-flask-video-stream-ae2307c/venv"
+set -gx VIRTUAL_ENV "/opt/ansible/semaphore/video-stream/venv"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH

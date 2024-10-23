@@ -1,0 +1,134 @@
+<!doctype html>
+
+<html>
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/styles.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.24.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		AWS.config.update({
+    	//These are temporary credentials generated via boto3 assume_role.
+    	accessKeyId : '{{AccessKeyId}}',
+    	secretAccessKey : '{{SecretAccessKey}}',
+    	sessionToken : '{{SessionToken}}',
+    	useAccelerateEndpoint : true
+    });
+</script>
+
+
+</head>
+  <script type="text/javascript">
+  	
+  	if (location.protocol !== 'https:') {
+  		location.replace(`https:${location.href.substring(location.protocol.length)}`);
+  	}
+  </script>
+<body style="margin:5%">
+	<div class=container>
+
+
+		<input type="file" id="subfile" name="subfile" style="display:none">
+		<label for="subfile" class="btn btn-primary">Choose Subtitle</label>
+		<input type="file" id="myfile" name="myfile" style="display:none">
+		<label for="myfile" class="btn btn-primary">Choose file</label>
+
+		<br>
+		<div style="margin-top:2%">
+			<div class="progress">
+				<div id="prog" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+			</div>
+		</div>
+		<button id="joinbtn" onclick="location.href = '/join'" class='button' type='button'>Enter Room</button>
+		<script type="text/javascript">
+			var btn = document.getElementById("joinbtn")
+			btn.style.display="none";
+			var fileselector=document.getElementById('myfile')
+			var subselector=document.getElementById('subfile')
+			function makeid(length) {
+				var result           = '';
+				var characters       = 'abcdefghijklmnopqrstuvwxyz0123456789';
+				var charactersLength = characters.length;
+				for ( var i = 0; i < length; i++ ) {
+					result += characters.charAt(Math.floor(Math.random() * charactersLength));
+				}
+				return result;
+			}
+			var filename=makeid(5)
+			var subname=filename+'.vtt'
+			fileselector.onchange=function(){
+				console.log(fileselector.files[0].name)
+				var bucket = new AWS.S3({params: {Bucket: 'watchsyncus'}});
+				var fileChooser = document.getElementById('file');
+				var bucketName = 'watchsyncus';
+				var fileToBeUpload = fileselector.files[0];
+
+				var bucket = new AWS.S3({
+					apiVersion: '2006-03-01',
+					params: {Bucket: bucketName}
+				});
+				var params = {
+					Key:filename,
+					ContentType: fileToBeUpload.type,
+					Body: fileToBeUpload,
+					ContentDisposition: 'attachment'
+				};
+
+				AWS.config.httpOptions.timeout = 0;
+				bucket.upload(params).on('httpUploadProgress', function(evt) {
+					var uploaded = Math.round(evt.loaded / evt.total * 100);
+					document.getElementById('prog').style.width=uploaded+'%';
+					console.log(`File uploaded: ${uploaded}%`);
+				}).send(function(err, data) {
+					if (err){
+				        console.log(err, err.stack);
+				        return;
+				    }
+
+				    var fileUrl = data.Location;
+				    console.log('File URL:', fileUrl);
+				    alert('File is uploaded successfully!');
+				    btn.style.display="block"
+				    document.getElementById("joinbtn").onclick = function() {
+				    	location.href='/room/'+filename;
+				    }
+})}
+				subselector.onchange=function(){
+				console.log(subselector.files[0].name)
+				var bucket = new AWS.S3({params: {Bucket: 'watchsyncus'}});
+				var fileChooser = document.getElementById('subfile');
+				var bucketName = 'watchsyncus';
+				var fileToBeUpload = subselector.files[0];
+
+				var bucket = new AWS.S3({
+					apiVersion: '2006-03-01',
+					params: {Bucket: bucketName}
+				});
+				var params = {
+					Key:subname,
+					ContentType: fileToBeUpload.type,
+					Body: fileToBeUpload,
+					ContentDisposition: 'attachment'
+				};
+
+				AWS.config.httpOptions.timeout = 0;
+				bucket.upload(params).on('httpUploadProgress', function(evt) {
+					var uploaded = Math.round(evt.loaded / evt.total * 100);
+					console.log(`Subtitle uploaded: ${uploaded}%`);
+				}).send(function(err, data) {
+					if (err){
+				        console.log(err, err.stack);
+				        return;
+				    }
+
+				    var fileUrl = data.Location;
+				    console.log('File URL:', fileUrl);
+				    alert('Subtitle is uploaded successfully');
+
+})}
+</script>
+</div>
+</body>
+</html>
+
