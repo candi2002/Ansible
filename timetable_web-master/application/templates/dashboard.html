@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block pagestyles %}
+  <link href="{{ url_for('static', filename='dist/css/dashboard.css') }}" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="https://use.typekit.net/sus7rlu.css">
+{% endblock %}
+
+{% block nav %}
+  <nav style="position:absolute; top:20px; right:20px;">
+    <a href="{{ url_for('main_bp.session_view') }}" style="color:white">Session test</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+    <a href="{{ url_for('auth_bp.logout_page') }}" style="color:white">로그아웃</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+    <a href="{{url_for('main_bp.home')}}" style="color:white">시간표</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+    <a href="{{ url_for('main_bp.calendar_view') }}" style="color:white">달력</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+    <a href="{{url_for('main_bp.map')}}" style="color:white">캠퍼스 지도</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+    <a href="{{ url_for('main_bp.bus') }}" style="color:white">순환 버스</a>
+  </nav>
+{% endblock %}
+
+
+{% block content %}
+    <h1>{{body}}</h1>
+
+    {% if current_user.is_authenticated %}
+    <p>Hi {{ current_user.name }}!</p>
+    <a href="{{ url_for('auth_bp.logout_page') }}">Log out</a>
+  {% endif %}
+{% endblock %}

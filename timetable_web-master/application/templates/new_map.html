@@ -1,0 +1,16 @@
+{% extends "layout2.html" %}
+{% block body %}
+<!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="utf-8">
+            <title>지도 생성하기</title>  
+        </head>
+        <body>
+            <iframe src="https://map.naver.com/v5/search/%EB%B6%80%EC%82%B0%EB%8C%80/place/11591560?c=14368661.2409330,4195630.8712305,15,0,0,0,dh" style="width:1000px; height:500px">
+            </iframe>
+            <li><a href="{{ url_for('main_bp.yangsan') }}">양산 캠퍼스</a></li>
+            <li><a href="{{ url_for('main_bp.miryang') }}">밀양 캠퍼스</a></li>
+        </body>
+    </html>
+{% endblock %}

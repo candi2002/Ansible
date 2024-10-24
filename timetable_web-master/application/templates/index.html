@@ -1,0 +1,187 @@
+{% extends "layout2.html" %}
+{% block body %}
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset='utf-8' />
+    <link href="{{ url_for('static', filename='dist/css/fullcalendar.min.css') }}" rel='stylesheet' />
+    <script src="{{ url_for('static', filename='dist/js/moment.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='dist/js/fullcalendar.min.js') }}"></script>
+        <script>
+            $(document).ready(function () {
+                /* initialize the calendar
+             -----------------------------------------------------------------*/
+                //Date for the calendar events (dummy data)
+                var date = new Date();
+                var d = date.getDate(),
+                    m = date.getMonth(),
+                    y = date.getFullYear();
+                $('#calendar').fullCalendar({
+                    header: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'month,agendaWeek,agendaDay'
+                    },
+                    editable: true,
+                    eventLimit: false, // allow "more" link when too many events
+                    events: [
+                        {
+                            title: 'All Day Event All Day Event All Day Event', 
+                            start: new Date(y, m, 1),
+                            backgroundColor: "#f56954", //red
+                            borderColor: "#f56954" //red                        
+                        },
+                        {
+                            title: 'Long Event',
+                            start: new Date(y, m, d - 5),
+                            end: new Date(y, m, d - 2),
+                            backgroundColor: "#f39c12", //yellow
+                            borderColor: "#f39c12" //yellow
+                        },
+                        {
+                            "title": "Repeating Event",
+                            start: new Date(y, m, d - 10),
+                            end: new Date(y, m, d - 8),
+                            backgroundColor: "#00c0ef", //yellow
+                            borderColor: "#00c0ef" //yellow
+                        },
+                        {
+                            title: 'Meeting',
+                            start: new Date(y, m, d, 10, 30),
+                            allDay: false,
+                            backgroundColor: "#0073b7", //Blue
+                            borderColor: "#0073b7" //Blue
+                        },
+                        {
+                            title: 'Meeting1',
+                            start: new Date(y, m, 8, 10, 30),
+                            allDay: false,
+                            backgroundColor: "#2980b9", //Blue
+                            borderColor: "#2980b9" //Blue
+                        },
+                        {
+                            title: 'Meeting2',
+                            start: new Date(y, m, 8, 14, 30),
+                            allDay: false,
+                            backgroundColor: "#27ae60", //Blue
+                            borderColor: "#27ae60" //Blue
+                        },
+                        {
+                            "title": "Happy Hour",
+                            start: new Date(y, m, 12, 12, 0),
+                            end: new Date(y, m, 12, 14, 0),
+                            allDay: false,
+                            backgroundColor: "#3c8dbc", //Info (aqua)
+                            borderColor: "#3c8dbc" //Info (aqua)
+                        },
+                        {
+                            title: 'Lunch',
+                            start: new Date(y, m, d, 12, 0),
+                            end: new Date(y, m, d, 14, 0),
+                            allDay: false,
+                            backgroundColor: "#00c0ef", //Info (aqua)
+                            borderColor: "#00c0ef" //Info (aqua)
+                        },
+                        {
+                            title: 'Birthday Party',
+                            start: new Date(y, m, d + 1, 19, 0),
+                            end: new Date(y, m, d + 1, 22, 30),
+                            allDay: false,
+                            backgroundColor: "#00a65a", //Success (green)
+                            borderColor: "#00a65a" //Success (green)
+                        },
+                        {
+                            title: 'Click for Google',
+                            start: new Date(y, m, 28),
+                            end: new Date(y, m, 29),
+                            backgroundColor: "#3c8dbc", //Primary (light-blue)
+                            borderColor: "#3c8dbc" //Primary (light-blue)
+                        }
+                    ],
+                    loading: function (bool) {
+                        $('#loading').toggle(bool);
+                    },
+                    eventMouseover: function (event, element) {                    
+                        $('<p class="tooltip" style="background-color:'+event.backgroundColor+'"></p>')
+                            .text(event.title)
+                            .appendTo('body')
+                            .fadeIn('fast');                    
+                    },
+                    eventMouseout: function (event, element) {                    
+                        $('.tooltip').remove();
+                    },
+                    eventRender: function (event, element) {                    
+
+                        element.mousemove(function(e){
+                            var mousex = e.pageX + 10; //Get X coordinates
+                            var mousey = e.pageY + 5; //Get Y coordinates
+                            $('.tooltip')
+                                .css({ top: mousey, left: mousex })
+                        })
+
+                    }
+                });
+
+            });
+        </script>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: "Lucida Grande", Helvetica, Arial, Verdana, sans-serif;
+                font-size: 14px;
+            }
+
+            #script-warning {
+                display: none;
+                background: #eee;
+                border-bottom: 1px solid #ddd;
+                padding: 0 10px;
+                line-height: 40px;
+                text-align: center;
+                font-weight: bold;
+                font-size: 12px;
+                color: red;
+            }
+
+            #loading {
+                display: none;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+            }
+
+            #calendar {
+                max-width: 900px;
+                margin: 40px auto;
+                padding: 0 10px;
+            }
+            /*Custome Stye Calender*/
+
+
+
+            .tooltip {
+                width: 145px;
+                word-wrap: break-word;
+                display:none;
+                position:absolute;
+                border:1px solid #333;
+                /*            background-color:#161616;*/
+                border-radius:5px;
+                padding:10px;
+                color:#fff;
+                font-size:12px;
+                z-index: 9999;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <div id='calendar'></div>    
+    </body>
+
+</html>
+{% endblock %}

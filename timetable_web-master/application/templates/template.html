@@ -1,0 +1,27 @@
+{% extends "layout2.html" %}
+{% block body %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>Unserializable Software</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}">
+</head>
+<body>
+   <header>
+     <div class="section">
+       <h2 class="logo"><span>time_table</span></h2>
+       <strong><nav>
+         <ul class="menu">
+           <li><a href="{{ url_for('main_bp.home') }}">시간표 찾기</a></li>
+           <li><a href="{{ url_for('main_bp.register') }}">새 시간표 등록</a></li>
+           <li><a href="{{ url_for('main_bp.school') }}">수강 편람 보기</a></li>
+         </ul>
+       </nav></strong>
+     </div>
+   </header>
+   {% block content %}
+   {% endblock %}
+</body>
+</html>
+{% endblock %}

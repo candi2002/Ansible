@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>{% block title %}환영합니다.{% endblock %}|PNU 에브리타임</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <body>
+    <div class = "container">
+        <h1>PNU 에브리타임</h1>
+        {% block nav %}
+        <nav style="position:absolute; top:50px; right:70px;">
+          <a href="{{ url_for('main_bp.session_view') }}" style="color:white">Session test</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="{{ url_for('auth_bp.logout_page') }}" style="color:white">로그아웃</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="{{url_for('main_bp.home')}}" style="color:white">시간표</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="{{ url_for('main_bp.calendar_view') }}" style="color:white">달력</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="{{url_for('main_bp.map')}}" style="color:white">캠퍼스 지도</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="{{url_for('main_bp.bus')}}" style="color:white">순환 버스</a>
+        </nav>
+        {% endblock %}
+        {% with flashes = get_flashed_messages() %}
+            {% if flashes %}
+                <ul class = flashes>
+                    {% for message in flashes %}
+                        <li>{{message}}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class = "body">
+            {% block body %}{% endblock %}
+        </div>
+        <div class = "footer">
+            DSC 솔루션챌린지 &mdash; 플라스크를 이용한 웹 애플리케이션
+        </div>
+    </div>
+    </body>
+</html>
