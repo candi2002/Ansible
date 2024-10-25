@@ -1,10 +1,10 @@
+import numpy as np  # Thêm dòng này
 import cv2
 import datetime
-import time
 from pathlib import Path
 
 def capture_and_save(im):
-    if not isinstance(im, (np.ndarray)):  # Kiểm tra kiểu dữ liệu
+    if not isinstance(im, np.ndarray):  # Kiểm tra kiểu dữ liệu
         raise ValueError("im must be a numpy array (image)")
 
     s = im.shape
