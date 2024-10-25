@@ -1,4 +1,4 @@
-import numpy as np  # Thêm dòng này
+import numpy as np  # Nhập NumPy
 import cv2
 import datetime
 from pathlib import Path
@@ -8,9 +8,9 @@ def capture_and_save(im):
         raise ValueError("im must be a numpy array (image)")
 
     s = im.shape
-    # Add a timestamp
+    # Thêm timestamp
     font = cv2.FONT_HERSHEY_SIMPLEX
-    bottomLeftCornerOfText = (10, s[0]-10)
+    bottomLeftCornerOfText = (10, s[0] - 10)
     fontScale = 1
     fontColor = (20, 20, 20)
     lineType = 2
@@ -31,8 +31,8 @@ def capture_and_save(im):
     m += 1
     lp = Path("images/last.png")
     if lp.exists() and lp.is_file():
-        np = Path("images/img_{}.png".format(m))
-        np.write_bytes(lp.read_bytes())
+        new_image_path = Path("images/img_{}.png".format(m))  # Đổi tên biến
+        new_image_path.write_bytes(lp.read_bytes())
     cv2.imwrite("images/last.png", im)
 
 if __name__ == "__main__":
