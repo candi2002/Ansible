@@ -1,8 +1,5 @@
 [controller]
-192.168.9.134 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
+192.168.10.9 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
 
 [host]
-192.168.9.158 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
-
-[windows]
-192.168.9.121 ansible_user=letho ansible_password=candi ansible_connection=winrm ansible_port=5985 ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+192.168.1.89 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
