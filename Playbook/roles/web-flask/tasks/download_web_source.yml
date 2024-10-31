@@ -1,0 +1,22 @@
+---
+- name: Tải về file ZIP từ GitHub
+  ansible.builtin.command:
+    cmd: "curl -L -o /tmp/my_ansible_upload_img.zip https://github.com/candi2002/Ansible/archive/3020f429699e400e1528aa4acd6d14bc3064c552.zip"
+  args:
+    warn: false
+
+- name: Giải nén file ZIP vào thư mục đích
+  ansible.builtin.unarchive:
+    src: /tmp/my_ansible_upload_img.zip  # Đổi tên file ZIP ở đây
+    dest: /opt/
+    remote_src: yes
+
+- name: Kiểm tra nếu thư mục đã được giải nén
+  ansible.builtin.stat:
+    path: /opt/Ansible-3020f429699e400e1528aa4acd6d14bc3064c552/upload-img
+  register: unzip_check
+
+- name: Xác nhận việc giải nén thành công
+  ansible.builtin.debug:
+    msg: "Thư mục đã được giải nén thành công!" 
+  when: unzip_check.stat.exists
