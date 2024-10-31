@@ -42,10 +42,16 @@
     path: /tmp/repo.zip
     state: absent
 
-- name: Xóa thư mục backup sau khi lấy xong
-  ansible.builtin.file:
+- name: Kiểm tra sự tồn tại của thư mục uploads_backup
+  ansible.builtin.stat:
     path: /opt/flask_web/uploads_backup
-    state: absent
+  register: uploads_backup
+
+- name: Khôi phục thư mục uploads
+  ansible.builtin.command:
+    cmd: "sudo cp -r /opt/flask_web/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
+  ignore_errors: yes
+  when: uploads_backup.stat.exists and uploads_backup.stat.size > 0
 
 - name: Xóa thư mục Ansible sau khi lấy xong
   ansible.builtin.file:
