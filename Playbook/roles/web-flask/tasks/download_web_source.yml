@@ -31,11 +31,6 @@
   ansible.builtin.command:
     cmd: "mv /opt/flask_web/Ansible-main/upload-img /opt/flask_web/upload-img"
 
-- name: Kiểm tra sự tồn tại của thư mục uploads_backup
-  ansible.builtin.stat:
-    path: /opt/flask_web/uploads_backup
-  register: uploads_backup
-
 - name: Khôi phục thư mục uploads
   ansible.builtin.command:
     cmd: "sudo cp -r /opt/flask_web/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
