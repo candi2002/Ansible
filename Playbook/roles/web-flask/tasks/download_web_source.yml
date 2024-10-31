@@ -32,12 +32,10 @@
     cmd: "mv /opt/flask_web/Ansible-main/upload-img /opt/flask_web/upload-img"
 
 - name: Khôi phục thư mục uploads
-  ansible.builtin.command:
+  ansible.builtin.shell:
     cmd: "cp -r /opt/flask_web/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
   ignore_errors: yes
   become: yes
-  become_user: root  # Chỉ định người dùng cụ thể (mặc định là root)
-  become_method: sudo  # Phương pháp nâng quyền (mặc định là sudo)
 
 
 - name: Xóa file ZIP sau khi giải nén
