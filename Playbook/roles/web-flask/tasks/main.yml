@@ -1,3 +1,4 @@
 ---
-- include_tasks: download_web_source.yml
-- include_tasks: run_web.yml
+- include_tasks: tasks/install_dependencies.yml
+- include_tasks: tasks/download_web_source.yml
+- include_tasks: tasks/run_app.yml
