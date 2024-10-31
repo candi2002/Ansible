@@ -33,7 +33,7 @@
 
 - name: Khôi phục thư mục uploads
   ansible.builtin.command:
-    cmd: "cp -r /opt/flask_web/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
+    cmd: "sudo cp -r /opt/flask_web/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
   ignore_errors: yes
   when: uploads_backup.stat.exists and uploads_backup.stat.size > 0
 
