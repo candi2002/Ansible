@@ -1,5 +1,5 @@
 ---
-- name: Tạo thư mục đích cho ứng dụng nếu chưa tồn tại
+- name: Tạo thư mục đích cho ứng dụng
   ansible.builtin.file:
     path: /opt/flask_web/upload-img
     state: directory
@@ -7,43 +7,25 @@
     group: candi
     mode: '0755'
 
-- name: Sao lưu thư mục uploaders nếu tồn tại
-  ansible.builtin.command:
-    cmd: "cp -r /opt/flask_web/upload-img/static/uploads /tmp/uploaders_backup"
-  ignore_errors: yes
-
-- name: Xóa toàn bộ thư mục upload-img
+- name: Xóa thư mục upload-img nếu đã tồn tại
   ansible.builtin.file:
     path: /opt/flask_web/upload-img
     state: absent
-
-- name: Tạo lại thư mục upload-img
-  ansible.builtin.file:
-    path: /opt/flask_web/upload-img
-    state: directory
-    owner: candi
-    group: candi
-    mode: '0755'
+  ignore_errors: yes
 
 - name: Tải về file ZIP chứa toàn bộ repository từ GitHub
   ansible.builtin.command:
     cmd: "curl -L -o /tmp/repo.zip https://github.com/candi2002/Ansible/archive/refs/heads/main.zip"
 
-- name: Giải nén file ZIP vào thư mục tạm
+- name: Giải nén file ZIP vào thư mục đích
   ansible.builtin.unarchive:
     src: /tmp/repo.zip
     dest: /opt/flask_web/
     remote_src: yes
 
-- name: Di chuyển thư mục upload-img mới vào vị trí mong muốn
+- name: Di chuyển thư mục upload-img vào vị trí mong muốn
   ansible.builtin.command:
-    cmd: "mv /opt/flask_web/Ansible-main/upload-img/* /opt/flask_web/upload-img/"
-  ignore_errors: yes
-
-- name: Khôi phục thư mục uploaders
-  ansible.builtin.command:
-    cmd: "mv /tmp/uploaders_backup /opt/flask_web/upload-img/static/uploads"
-  ignore_errors: yes
+    cmd: "mv /opt/flask_web/Ansible-main/upload-img /opt/flask_web/upload-img"
 
 - name: Xóa file ZIP sau khi giải nén
   ansible.builtin.file:
@@ -54,9 +36,3 @@
   ansible.builtin.file:
     path: /opt/flask_web/Ansible-main
     state: absent
-
-- name: Xóa thư mục sao lưu uploaders
-  ansible.builtin.file:
-    path: /tmp/uploaders_backup
-    state: absent
-  ignore_errors: yes
