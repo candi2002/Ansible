@@ -8,7 +8,7 @@
     mode: '0755'
 - name: Sao lưu thư mục uploads nếu tồn tại (Giữ lại ảnh của những lần trước đó)
   ansible.builtin.command:
-    cmd: "cp -r /opt/flask_web/upload-img/static/uploads /tmp/uploaders_backup"
+    cmd: "cp -r /opt/flask_web/upload-img/static/uploads /tmp/uploads_backup"
   ignore_errors: yes
   
 - name: Xóa thư mục upload-img nếu đã tồn tại
@@ -33,7 +33,7 @@
 
 - name: Khôi phục thư mục uploads
   ansible.builtin.command:
-    cmd: "mv /tmp/uploaders_backup/ /opt/flask_web/upload-img/static/uploads"
+    cmd: "mv /tmp/uploads_backup/ /opt/flask_web/upload-img/static/uploads"
   ignore_errors: yes
 
 - name: Xóa file ZIP sau khi giải nén
