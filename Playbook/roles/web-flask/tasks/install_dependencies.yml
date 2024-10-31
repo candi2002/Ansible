@@ -1,0 +1,8 @@
+---
+- name: Ensure Flask app dependencies are installed
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - python3-pip
+    - python3-venv
