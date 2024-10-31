@@ -7,6 +7,12 @@
     group: candi
     mode: '0755'
 
+- name: Xóa thư mục upload-img nếu đã tồn tại
+  ansible.builtin.file:
+    path: /opt/flask_web/upload-img
+    state: absent
+  ignore_errors: yes
+
 - name: Tải về file ZIP chứa toàn bộ repository từ GitHub
   ansible.builtin.command:
     cmd: "curl -L -o /tmp/repo.zip https://github.com/candi2002/Ansible/archive/refs/heads/main.zip"
