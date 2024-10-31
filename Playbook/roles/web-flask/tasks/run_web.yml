@@ -1,2 +1,31 @@
 ---
+- name: Create systemd service for Flask app
+  template:
+    src: flask_app.service.j2
+    dest: /etc/systemd/system/flask_app.service
+
+- name: Reload systemd to apply changes
+  command: systemctl daemon-reload
+
+- name: Enable and start Flask app service
+  systemd:
+    name: flask_app
+    state: started
+    enabled: yes
+
+- name: Open port 5000 on the firewall
+  ufw:
+    rule: allow
+    port: 5000
+    proto: tcp
+    comment: "Allow Flask web server traffic on port 5000"
+
+- name: Check Flask app service status
+  shell: systemctl status flask_app
+  register: service_status
+  ignore_errors: yes
+
+- name: Debug service status
+  debug:
+    msg: "{{ service_status.stdout }}"
 
