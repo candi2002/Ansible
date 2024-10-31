@@ -1,30 +1,23 @@
----
-# download_and_unzip/tasks/main.yml
-
-- name: Tải về file ZIP từ GitHub
+- name: Tải về file ZIP chứa toàn bộ repository từ GitHub
   ansible.builtin.command:
-    cmd: "curl -L -o /tmp/web.zip https://github.com/candi2002/Ansible/archive/3020f429699e400e1528aa4acd6d14bc3064c552.zip"
-  args:
-    warn: false
+    cmd: "curl -L -o /tmp/repo.zip https://github.com/candi2002/Ansible/archive/refs/heads/main.zip"
 
 - name: Giải nén file ZIP vào thư mục đích
   ansible.builtin.unarchive:
-    src: /tmp/web.zip
+    src: /tmp/repo.zip
     dest: /opt/flask_web/
     remote_src: yes
 
-- name: Đổi tên thư mục sau khi giải nén
+- name: Di chuyển thư mục upload-img vào vị trí mong muốn
   ansible.builtin.command:
-    cmd: "mv /opt/flask_web/Ansible-3020f429699e400e1528aa4acd6d14bc3064c552 /opt/flask_web/my_upload_img"
-  args:
-    removes: /opt/flask_web/my_upload_img  # Chỉ chạy nếu thư mục chưa tồn tại
+    cmd: "mv /opt/flask_web/Ansible-main/upload-img /opt/flask_web/upload-img"
 
-- name: Kiểm tra nếu thư mục đã được đổi tên thành công
-  ansible.builtin.stat:
-    path: /opt/flask_web/my_upload_img
-  register: rename_check
+- name: Xóa file ZIP sau khi giải nén
+  ansible.builtin.file:
+    path: /tmp/repo.zip
+    state: absent
 
-- name: Xác nhận việc đổi tên thành công
-  ansible.builtin.debug:
-    msg: "Thư mục đã được đổi tên thành công!"
-  when: rename_check.stat.exists
+- name: Xóa thư mục Ansible sau khi lấy xong
+  ansible.builtin.file:
+    path: /opt/flask_web/Ansible-main
+    state: absent
