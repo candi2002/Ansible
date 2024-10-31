@@ -1,0 +1,10 @@
+---
+- include_tasks: update_upgrade.yml
+
+- include_tasks: install_dev_tools.yml
+
+- include_tasks: install_db.yml
+
+- include_tasks: install_web_browsers.yml
+
+- include_tasks: install_other_software.yml
