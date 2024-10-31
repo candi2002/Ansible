@@ -2,45 +2,5 @@
 - name: Cài đặt các phần mềm cần thiết trên Ubuntu
   hosts: all
   become: yes
-
-  tasks:
-    - name: Cập nhật danh sách gói
-      apt:
-        update_cache: yes
-
-    - name: Nâng cấp tất cả các gói
-      apt:
-        upgrade: dist
-
-    - name: Cài đặt Git
-      apt:
-        name: git
-        state: present
-
-    - name: Cài đặt curl
-      apt:
-        name: curl
-        state: present
-
-    - name: Cài đặt vim
-      apt:
-        name: vim
-        state: present
-
-    - name: Cài đặt htop
-      apt:
-        name: htop
-        state: present
-
-    - name: Cài đặt GCC và các thư viện phát triển
-      apt:
-        name:
-          - build-essential
-          - gcc
-          - g++
-          - make
-          - libssl-dev
-          - libffi-dev
-          - python3-dev
-        state: present
-
+  roles:
+    - set_up
