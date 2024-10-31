@@ -1,0 +1,41 @@
+---
+- name: Cài đặt Git
+  apt:
+    name: git
+    state: present
+
+- name: Cài đặt curl
+  apt:
+    name: curl
+    state: present
+
+- name: Cài đặt wget
+  apt:
+    name: wget
+    state: present
+
+- name: Cài đặt build-essential và các công cụ phát triển
+  apt:
+    name:
+      - build-essential
+      - gcc
+      - g++
+      - make
+      - cmake
+    state: present
+
+- name: Cài đặt các thư viện phát triển
+  apt:
+    name:
+      - libssl-dev
+      - libffi-dev
+      - python3-dev
+      - zlib1g-dev
+    state: present
+
+- name: Cài đặt Python và pip
+  apt:
+    name:
+      - python3
+      - python3-pip
+    state: present
