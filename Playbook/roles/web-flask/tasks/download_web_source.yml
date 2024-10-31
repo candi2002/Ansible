@@ -33,9 +33,13 @@
 
 - name: Khôi phục thư mục uploads
   ansible.builtin.command:
-    cmd: "sudo cp -r /opt/flask_web/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
+    cmd: "cp -r /opt/flask_web/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
   ignore_errors: yes
   when: uploads_backup.stat.exists and uploads_backup.stat.size > 0
+  become: yes
+  become_user: root  # Chỉ định người dùng cụ thể (mặc định là root)
+  become_method: sudo  # Phương pháp nâng quyền (mặc định là sudo)
+
 
 - name: Xóa file ZIP sau khi giải nén
   ansible.builtin.file:
@@ -47,6 +51,7 @@
     path: /opt/flask_web/uploads_backup
     state: absent
   become: yes  
+  
 - name: Xóa thư mục Ansible sau khi lấy xong
   ansible.builtin.file:
     path: /opt/flask_web/Ansible-main
