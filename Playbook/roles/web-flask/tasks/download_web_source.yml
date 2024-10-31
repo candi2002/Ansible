@@ -1,4 +1,3 @@
----
 - name: Tạo thư mục đích cho ứng dụng
   ansible.builtin.file:
     path: /opt/flask_web/upload-img
@@ -6,11 +5,12 @@
     owner: candi
     group: candi
     mode: '0755'
+
 - name: Sao lưu thư mục uploads nếu tồn tại (Giữ lại ảnh của những lần trước đó)
   ansible.builtin.command:
     cmd: "cp -r /opt/flask_web/upload-img/static/uploads /tmp/uploads_backup"
   ignore_errors: yes
-  
+
 - name: Xóa thư mục upload-img nếu đã tồn tại
   ansible.builtin.file:
     path: /opt/flask_web/upload-img
@@ -33,16 +33,17 @@
 
 - name: Khôi phục thư mục uploads
   ansible.builtin.command:
-    cmd: "mv /tmp/uploads_backup/ /opt/flask_web/upload-img/static/uploads"
+    cmd: "cp -r /tmp/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
   ignore_errors: yes
 
 - name: Xóa file ZIP sau khi giải nén
   ansible.builtin.file:
     path: /tmp/repo.zip
     state: absent
+
 - name: Xóa thư mục backup sau khi lấy xong
   ansible.builtin.file:
-    path: /tmp/uploaders_backup
+    path: /tmp/uploads_backup
     state: absent
 
 - name: Xóa thư mục Ansible sau khi lấy xong
