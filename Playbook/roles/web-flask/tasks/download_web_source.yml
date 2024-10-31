@@ -40,10 +40,10 @@
   ansible.builtin.file:
     path: /tmp/repo.zip
     state: absent
-#- name: Xóa thư mục backup sau khi lấy xong
-#  ansible.builtin.file:
-#    path: /tmp/uploaders_backup
-#    state: absent
+- name: Xóa thư mục backup sau khi lấy xong
+  ansible.builtin.file:
+    path: /tmp/uploaders_backup
+    state: absent
 
 - name: Xóa thư mục Ansible sau khi lấy xong
   ansible.builtin.file:
