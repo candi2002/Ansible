@@ -46,7 +46,7 @@
   ansible.builtin.file:
     path: /opt/flask_web/uploads_backup
     state: absent
-
+  become: yes  
 - name: Xóa thư mục Ansible sau khi lấy xong
   ansible.builtin.file:
     path: /opt/flask_web/Ansible-main
