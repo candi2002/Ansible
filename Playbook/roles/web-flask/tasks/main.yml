@@ -1,2 +1,3 @@
 ---
-# tasks file for web-flask
+- include_tasks: download_web_source.yml
+
