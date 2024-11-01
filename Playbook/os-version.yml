@@ -7,6 +7,7 @@
       debug:
         msg: "Hệ điều hành: {{ ansible_distribution }} {{ ansible_distribution_version }}"
       when: ansible_os_family == "Linux"
+      become: yes  # Thêm dòng này chỉ cho Linux
 
     - name: Hiển thị thông tin phiên bản hệ điều hành cho Windows
       debug:
