@@ -1,25 +1,29 @@
----
 - name: Cài đặt Python 3
   win_chocolatey:
     name: python3
     state: present
+  ignore_errors: yes
 
 - name: Cài đặt Git
   win_chocolatey:
     name: git
     state: present
+  ignore_errors: yes
 
 - name: Cài đặt Visual Studio Code
   win_chocolatey:
     name: vscode
     state: present
+  ignore_errors: yes
 
 - name: Cài đặt C++ Build Tools
   win_chocolatey:
     name: visualstudio2019buildtools
     state: present
+  ignore_errors: yes
 
 - name: Cài đặt GCC (MinGW)
   win_chocolatey:
     name: mingw
     state: present
+  ignore_errors: yes
