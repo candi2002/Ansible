@@ -1,0 +1,8 @@
+---
+- name: Cập nhật danh sách gói
+  apt:
+    update_cache: yes
+
+- name: Nâng cấp tất cả các gói
+  apt:
+    upgrade: dist

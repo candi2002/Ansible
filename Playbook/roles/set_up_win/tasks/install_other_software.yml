@@ -1,0 +1,40 @@
+---
+- name: Cài đặt htop
+  apt:
+    name: htop
+    state: present
+
+- name: Cài đặt tmux
+  apt:
+    name: tmux
+    state: present
+
+- name: Cài đặt Docker
+  apt:
+    name: docker.io
+    state: present
+
+- name: Cài đặt Docker Compose
+  apt:
+    name: docker-compose
+    state: present
+
+- name: Cài đặt VirtualBox
+  apt:
+    name: virtualbox
+    state: present
+
+- name: Cài đặt net-tools
+  apt:
+    name: net-tools
+    state: present
+
+- name: Cài đặt nmap
+  apt:
+    name: nmap
+    state: present
+
+- name: Cài đặt iftop
+  apt:
+    name: iftop
+    state: present

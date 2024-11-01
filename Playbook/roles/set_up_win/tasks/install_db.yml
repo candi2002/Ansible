@@ -1,0 +1,15 @@
+---
+- name: Cài đặt MySQL Server
+  apt:
+    name: mysql-server
+    state: present
+
+- name: Cài đặt PostgreSQL
+  apt:
+    name: postgresql
+    state: present
+
+- name: Cài đặt SQLite
+  apt:
+    name: sqlite3
+    state: present

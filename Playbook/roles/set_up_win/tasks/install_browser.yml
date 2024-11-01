@@ -1,0 +1,11 @@
+---
+- name: Cài đặt Firefox
+  apt:
+    name: firefox
+    state: present
+
+- name: Cài đặt Chromium Browser
+  apt:
+    name: chromium-browser
+    state: present
+
