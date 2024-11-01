@@ -4,12 +4,4 @@
 [host]
 192.168.1.89 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
 
-[windows]
-windows10 ansible_host=192.168.1.2
-[windows:vars]
-ansible_user=ansible
-ansible_password=candi
-ansible_port=5985
-ansible_connection=winrm
-ansible_winrm_transport=basic
-ansible_winrm_server_cert_validation=ignore
+
