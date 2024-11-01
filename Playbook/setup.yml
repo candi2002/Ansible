@@ -1,6 +1,11 @@
 ---
 - name: Cài đặt các phần mềm cần thiết trên Ubuntu
-  hosts: all
+  hosts: linux
   become: yes
+  roles:
+    - set_up
+---
+- name: Cài đặt các phần mềm cần thiết trên window
+  hosts: windows
   roles:
     - set_up
