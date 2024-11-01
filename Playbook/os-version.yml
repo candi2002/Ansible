@@ -1,6 +1,8 @@
 ---
-- name: Lấy thông tin phiên bản hệ điều hành của các máy chủ
+- name: OS version
   hosts: all
   gather_facts: yes
-  roles:
-    os_version
+  tasks:
+    - name: Show OS version
+      debug:
+        msg: "OS Version is {{ ansible_distribution }} {{ ansible_distribution_version }}"
