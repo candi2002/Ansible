@@ -1,8 +1,6 @@
 ---
 - name: win_ping module Playbook
-  hosts: windows
-  become: false
-  gather_facts: false
+  hosts: windows10
   tasks:
-    - name: test connection
+    - name: Test connection to Windows host
       ansible.windows.win_ping:
