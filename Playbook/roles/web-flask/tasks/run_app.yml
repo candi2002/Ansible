@@ -7,9 +7,9 @@
   debug:
     msg: "{{ w.stdout }}"
 
-- name: Ensure the Flask app virtual environment is activated and running
-  command: /opt/flask_web/upload-img/venv/bin/python /opt/flask_web/upload-img/youframe.py
-  args:
-    chdir: /opt/flask_web/upload-img
+#- name: Ensure the Flask app virtual environment is activated and running
+#  command: /opt/flask_web/upload-img/venv/bin/python /opt/flask_web/upload-img/youframe.py
+ # args:
+ #   chdir: /opt/flask_web/upload-img
 
 
