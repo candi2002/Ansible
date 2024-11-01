@@ -1,6 +1,6 @@
+---
 - name: Lấy thông tin phiên bản hệ điều hành của các máy chủ
   hosts: all
   gather_facts: yes
-
   roles:
     os_version
