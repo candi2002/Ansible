@@ -1,4 +1,4 @@
 ---
-  name: ping host
+- name: ping host
   ping:
 
