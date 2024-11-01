@@ -5,7 +5,6 @@
   roles:
     - set_up
 
----
 - name: Cài đặt các phần mềm cần thiết trên Windows
   hosts: windows
   roles:
