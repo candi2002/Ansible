@@ -1,9 +1,8 @@
 ---
 - name: Lấy danh sách phần mềm đã cài đặt trên Ubuntu/Debian
-  hosts: all
+  hosts: linux
   become: yes
   tasks:
-
     - name: Gather the package facts
       ansible.builtin.package_facts:
         manager: auto
@@ -11,3 +10,14 @@
     - name: Print the package facts
       ansible.builtin.debug:
         var: ansible_facts.packages
+
+- name: Lấy danh sách phần mềm đã cài đặt trên Windows
+  hosts: windows
+  tasks:
+    - name: Gather installed software information
+      win_shell: Get-Package | Select-Object Name, Version
+      register: installed_software
+
+    - name: Print the installed software
+      debug:
+        var: installed_software.stdout_lines
