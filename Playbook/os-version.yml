@@ -3,6 +3,6 @@
   gather_facts: yes
 
   tasks:
-    - name: Hiển thị thông tin phiên bản hệ điều hành cho Linux
+    - name: Hiển thị thông tin phiên bản hệ điều hành
       debug:
         msg: "Hệ điều hành: {{ ansible_distribution }} {{ ansible_distribution_version }}"
