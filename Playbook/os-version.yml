@@ -4,7 +4,12 @@
   become: yes
 
   tasks:
-    - name: Hiển thị thông tin phiên bản hệ điều hành
+    - name: Hiển thị thông tin phiên bản hệ điều hành cho Linux
       debug:
         msg: "Hệ điều hành: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+      when: ansible_os_family == "Linux"
 
+    - name: Hiển thị thông tin phiên bản hệ điều hành cho Windows
+      debug:
+        msg: "Hệ điều hành: {{ ansible_distribution }} {{ ansible_version }}"
+      when: ansible_os_family == "Windows"
