@@ -1,5 +1,5 @@
 ---
-- include_task: ping.yml
+- include_tasks: ping.yml
 
 - include_tasks: upgrade.yml
 
