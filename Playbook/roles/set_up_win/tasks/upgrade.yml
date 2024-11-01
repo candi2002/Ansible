@@ -1,8 +1,6 @@
 ---
-- name: Cập nhật danh sách gói trên Windows
-  win_chocolatey_facts:
-
-- name: Nâng cấp tất cả các gói
-  win_chocolatey:
-    name: '*'
-    state: latest
+- name: Cập nhật Windows
+  win_updates:
+    category_names:
+      - Critical Updates
+      - Security Updates
