@@ -3,3 +3,9 @@
   command: /opt/flask_web/upload-img/venv/bin/python /opt/flask_web/upload-img/youframe.py
   args:
     chdir: /opt/flask_web/upload-img
+- shell: whoami
+  register: w
+  
+- debug:
+    msg:
+      - "{{ w }}" 
