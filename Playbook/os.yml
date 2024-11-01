@@ -7,6 +7,14 @@
       debug:
         var: ansible_os_family
 
+    - name: Kiểm tra thông tin phân phối
+      debug:
+        var: ansible_distribution
+
+    - name: Kiểm tra phiên bản phân phối
+      debug:
+        var: ansible_distribution_version
+
     - name: Hiển thị thông tin phiên bản hệ điều hành cho Linux
       debug:
         msg: "Hệ điều hành: {{ ansible_distribution }} {{ ansible_distribution_version }}"
