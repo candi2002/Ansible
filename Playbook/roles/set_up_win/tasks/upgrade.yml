@@ -1,8 +1,8 @@
 ---
-- name: Cập nhật danh sách gói
-  apt:
-    update_cache: yes
+- name: Cập nhật danh sách gói trên Windows
+  win_chocolatey_facts:
 
 - name: Nâng cấp tất cả các gói
-  apt:
-    upgrade: dist
+  win_chocolatey:
+    name: '*'
+    state: latest
