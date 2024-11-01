@@ -1,8 +1,10 @@
 ---
 - name: Cài đặt PostgreSQL
   win_chocolatey:
-    name: postgres
+    name: postgresql
     state: present
+    version: latest  # Hoặc phiên bản cụ thể nếu cần
+    options: '--pre'  # Chỉ sử dụng nếu bạn cài đặt phiên bản tiền phát hành
 
 - name: Cài đặt MySQL
   win_chocolatey:
