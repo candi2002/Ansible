@@ -8,4 +8,4 @@
 - name: Cài đặt các phần mềm cần thiết trên Windows
   hosts: windows
   roles:
-    - set_up
+    - set_up_win
