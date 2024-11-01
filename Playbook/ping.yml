@@ -1,10 +1,12 @@
 ---
-- hosts: all
+- name: Ping Test on Linux
+  hosts: linux
   tasks:
-    - name: Ping Test on Linux
-      when: ansible_os_family == "Linux"
+    - name: Ping Linux hosts
       ping:
 
-    - name: Ping Test on Windows
-      when: ansible_os_family == "Windows"
+- name: Ping Test on Windows
+  hosts: windows
+  tasks:
+    - name: Ping Windows hosts
       win_ping:
