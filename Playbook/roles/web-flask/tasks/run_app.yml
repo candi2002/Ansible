@@ -1,16 +1,15 @@
 ---
-- name: check who am i
-  shell:
-    whoami
-    register: w
- - name: check
-   debug:
-     msg:
-       - "{{ w }}" 
+- name: Check who am I
+  shell: whoami
+  register: w
+
+- name: Display user information
+  debug:
+    msg: "{{ w.stdout }}"
+
 - name: Ensure the Flask app virtual environment is activated and running
   command: /opt/flask_web/upload-img/venv/bin/python /opt/flask_web/upload-img/youframe.py
   args:
     chdir: /opt/flask_web/upload-img
- 
-  
+
 
