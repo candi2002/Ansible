@@ -1,24 +1,21 @@
 ---
 - name: Cập nhật Windows
-  hosts: windows
-  tasks:
-    - name: Cập nhật Windows
-      win_updates:
-        category_names:
-          - Critical Updates
-          - Security Updates
-      register: update_result
+  win_updates:
+    category_names:
+      - Critical Updates
+      - Security Updates
+  register: update_result
 
-    - name: Khởi động lại Windows nếu cần
-      win_reboot:
-        msg: "Cần khởi động lại để áp dụng bản cập nhật."
-        timeout: 600
-        test_command: whoami
-      when: update_result.reboot_required
+- name: Khởi động lại Windows nếu cần
+  win_reboot:
+    msg: "Cần khởi động lại để áp dụng bản cập nhật."
+    timeout: 600
+    test_command: whoami
+  when: update_result.reboot_required
 
-    - name: Kiểm tra và cài đặt lại các bản cập nhật sau khi khởi động lại
-      win_updates:
-        category_names:
-          - Critical Updates
-          - Security Updates
-      when: update_result.reboot_required
+- name: Kiểm tra và cài đặt lại các bản cập nhật sau khi khởi động lại
+  win_updates:
+    category_names:
+      - Critical Updates
+      - Security Updates
+  when: update_result.reboot_required
