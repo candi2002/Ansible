@@ -1,14 +1,16 @@
-
 - name: Lấy thông tin phiên bản hệ điều hành của các máy chủ
   hosts: controller, host
   gather_facts: yes
 
   tasks:
+    - name: Kiểm tra thông tin OS
+      debug:
+        var: ansible_os_family
+
     - name: Hiển thị thông tin phiên bản hệ điều hành cho Linux
       debug:
         msg: "Hệ điều hành: {{ ansible_distribution }} {{ ansible_distribution_version }}"
       when: ansible_os_family == "Linux"
-      become: yes  # Thêm dòng này chỉ cho Linux
 
     - name: Hiển thị thông tin phiên bản hệ điều hành cho Windows
       debug:
