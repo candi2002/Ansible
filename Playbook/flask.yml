@@ -1,6 +1,6 @@
 ---
 - name: Deploy Flask Web Server and Quiz App
-  hosts: host
+  hosts: window
   become: yes
   tasks:
     - name: Ensure Python3 and venv are installed
