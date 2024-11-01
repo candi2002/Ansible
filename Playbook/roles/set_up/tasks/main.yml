@@ -1,4 +1,6 @@
 ---
+- include_task: ping.yml
+
 - include_tasks: upgrade.yml
 
 - include_tasks: install_dev_tools.yml
