@@ -1,15 +1,10 @@
 ---
-- name: Cài đặt MySQL Server
-  apt:
-    name: mysql-server
-    state: present
-
 - name: Cài đặt PostgreSQL
-  apt:
-    name: postgresql
+  win_chocolatey:
+    name: postgres
     state: present
 
-- name: Cài đặt SQLite
-  apt:
-    name: sqlite3
+- name: Cài đặt MySQL
+  win_chocolatey:
+    name: mysql
     state: present

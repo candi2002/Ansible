@@ -1,11 +1,10 @@
 ---
+- name: Cài đặt Google Chrome
+  win_chocolatey:
+    name: googlechrome
+    state: present
+
 - name: Cài đặt Firefox
-  apt:
+  win_chocolatey:
     name: firefox
     state: present
-
-- name: Cài đặt Chromium Browser
-  apt:
-    name: chromium-browser
-    state: present
-

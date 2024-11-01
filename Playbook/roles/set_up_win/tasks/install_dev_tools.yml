@@ -1,41 +1,25 @@
 ---
+- name: Cài đặt Python 3
+  win_chocolatey:
+    name: python3
+    state: present
+
 - name: Cài đặt Git
-  apt:
+  win_chocolatey:
     name: git
     state: present
 
-- name: Cài đặt curl
-  apt:
-    name: curl
+- name: Cài đặt Visual Studio Code
+  win_chocolatey:
+    name: vscode
     state: present
 
-- name: Cài đặt wget
-  apt:
-    name: wget
+- name: Cài đặt C++ Build Tools
+  win_chocolatey:
+    name: visualstudio2019buildtools
     state: present
 
-- name: Cài đặt build-essential và các công cụ phát triển
-  apt:
-    name:
-      - build-essential
-      - gcc
-      - g++
-      - make
-      - cmake
-    state: present
-
-- name: Cài đặt các thư viện phát triển
-  apt:
-    name:
-      - libssl-dev
-      - libffi-dev
-      - python3-dev
-      - zlib1g-dev
-    state: present
-
-- name: Cài đặt Python và pip
-  apt:
-    name:
-      - python3
-      - python3-pip
+- name: Cài đặt GCC (MinGW)
+  win_chocolatey:
+    name: mingw
     state: present
