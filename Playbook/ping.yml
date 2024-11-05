@@ -20,7 +20,7 @@
       register: syslog_errors
       ignore_errors: yes
 
-    - name: Send Telegram message for Ubuntu syslog errors
+    - name: Send Telegram message for Ubuntu syslog errors (limited to 4096 characters)
       uri:
         url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
         method: POST
@@ -29,7 +29,7 @@
         body: |
           {
             "chat_id": "1959952679",
-            "text": "Syslog errors detected on {{ inventory_hostname }}: {{ syslog_errors.stdout }}"
+            "text": "Syslog errors detected on {{ inventory_hostname }}: {{ syslog_errors.stdout[:4000] }}"
           }
         status_code: 200
       when: syslog_errors.stdout != ""
@@ -52,7 +52,7 @@
       register: event_log_errors
       ignore_errors: yes
 
-    - name: Send Telegram message for Windows Event Log errors
+    - name: Send Telegram message for Windows Event Log errors (limited to 4096 characters)
       uri:
         url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
         method: POST
@@ -61,7 +61,7 @@
         body: |
           {
             "chat_id": "1959952679",
-            "text": "Event Log errors detected on {{ inventory_hostname }}: {{ event_log_errors.stdout }}"
+            "text": "Event Log errors detected on {{ inventory_hostname }}: {{ event_log_errors.stdout[:4000] }}"
           }
         status_code: 200
       when: event_log_errors.stdout != ""
