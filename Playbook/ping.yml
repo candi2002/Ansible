@@ -15,8 +15,8 @@
         state: present
       when: ansible_os_family == "Debian"
 
-    - name: Check syslog on Ubuntu
-      shell: "grep -i error /var/log/syslog"
+    - name: Check syslog for errors in the last 30 minutes on Ubuntu
+      shell: "grep -i error /var/log/syslog | grep -E \"$(date --date='30 minutes ago' +'%b %d %H:%M')|$(date +'%b %d %H:%M')\""
       register: syslog_errors
       ignore_errors: yes
 
@@ -52,8 +52,8 @@
         state: present
       when: ansible_os_family == "Windows"
 
-    - name: Check Event Log for Errors on Windows
-      win_shell: "Get-EventLog -LogName System -EntryType Error"
+    - name: Check Event Log for Errors in the last 30 minutes on Windows
+      win_shell: "Get-EventLog -LogName System -EntryType Error | Where-Object { $_.TimeGenerated -gt (Get-Date).AddMinutes(-30) }"
       register: event_log_errors
       ignore_errors: yes
 
