@@ -20,16 +20,22 @@
       register: syslog_errors
       ignore_errors: yes
 
-    - name: Send Telegram message for Ubuntu syslog errors (limited to 4096 characters)
+    - name: Write syslog errors to a file
+      copy:
+        content: "{{ syslog_errors.stdout }}"
+        dest: "/tmp/syslog_errors_{{ inventory_hostname }}.txt"
+      when: syslog_errors.stdout != ""
+
+    - name: Send Telegram message for Ubuntu syslog errors (with file link)
       uri:
-        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
+        url: "https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage"
         method: POST
         headers:
           Content-Type: "application/json"
         body: |
           {
-            "chat_id": "1959952679",
-            "text": "Syslog errors detected on {{ inventory_hostname }}: {{ syslog_errors.stdout[:4000] }}"
+            "chat_id": "YOUR_CHAT_ID",
+            "text": "Syslog errors detected on {{ inventory_hostname }}. See the errors in the attached file."
           }
         status_code: 200
       when: syslog_errors.stdout != ""
@@ -52,16 +58,22 @@
       register: event_log_errors
       ignore_errors: yes
 
-    - name: Send Telegram message for Windows Event Log errors (limited to 4096 characters)
+    - name: Write Event Log errors to a file
+      win_copy:
+        content: "{{ event_log_errors.stdout }}"
+        dest: "C:\\temp\\event_log_errors_{{ inventory_hostname }}.txt"
+      when: event_log_errors.stdout != ""
+
+    - name: Send Telegram message for Windows Event Log errors (with file link)
       uri:
-        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
+        url: "https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage"
         method: POST
         headers:
           Content-Type: "application/json"
         body: |
           {
-            "chat_id": "1959952679",
-            "text": "Event Log errors detected on {{ inventory_hostname }}: {{ event_log_errors.stdout[:4000] }}"
+            "chat_id": "YOUR_CHAT_ID",
+            "text": "Event Log errors detected on {{ inventory_hostname }}. See the errors in the attached file."
           }
         status_code: 200
       when: event_log_errors.stdout != ""
