@@ -55,7 +55,7 @@
     # Hoặc sử dụng win_shell như sau:
     - name: Install IIS on Windows
       win_shell: |
-        Install-WindowsFeature -Name Web-Server -IncludeManagementTools
+        Enable-WindowsOptionalFeature -Online -FeatureName IIS-WebServer -All
 
     - name: Check Event Log for Errors on Windows
       win_shell: "Get-EventLog -LogName System -EntryType Error | Where-Object { $_.TimeGenerated -gt (Get-Date).AddMinutes(-30) }"
