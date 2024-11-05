@@ -16,8 +16,7 @@
       when: ansible_os_family == "Debian"
 
     - name: Check syslog for errors in the last 30 minutes on Ubuntu
-      shell: |
-        awk -v date="$(date --date='30 minutes ago' '+%b %d %H:%M')" '$0 ~ date, $0 ~ /error/i' /var/log/syslog
+      shell: "grep -i error /var/log/syslog | grep -E \"$(date --date='30 minutes ago' +'%b %d %H:%M')|$(date +'%b %d %H:%M')\""
       register: syslog_errors
       ignore_errors: yes
 
@@ -32,11 +31,7 @@
         method: POST
         headers:
           Content-Type: "application/json"
-        body: |
-          {
-            "chat_id": "1959952679",
-            "text": "Syslog errors detected on {{ inventory_hostname }}: {{ truncated_syslog_errors }}"
-          }
+        body: "{{ {'chat_id': '1959952679', 'text': 'Syslog errors detected on ' + inventory_hostname + ': ' + truncated_syslog_errors} | to_json }}"
         status_code: 200
       when: syslog_errors.stdout != ""
 
@@ -46,11 +41,7 @@
         method: POST
         headers:
           Content-Type: "application/json"
-        body: |
-          {
-            "chat_id": "1959952679",
-            "text": "No syslog errors detected on {{ inventory_hostname }} in the last 30 minutes."
-          }
+        body: "{{ {'chat_id': '1959952679', 'text': 'No syslog errors detected on ' + inventory_hostname + ' in the last 30 minutes.'} | to_json }}"
         status_code: 200
       when: syslog_errors.stdout == ""
 
@@ -67,7 +58,7 @@
         state: present
       when: ansible_os_family == "Windows"
 
-    - name: Check Event Log for Errors in the last 30 minutes on Windows
+    - name: Check Event Log for Errors on Windows
       win_shell: "Get-EventLog -LogName System -EntryType Error | Where-Object { $_.TimeGenerated -gt (Get-Date).AddMinutes(-30) }"
       register: event_log_errors
       ignore_errors: yes
@@ -83,11 +74,7 @@
         method: POST
         headers:
           Content-Type: "application/json"
-        body: |
-          {
-            "chat_id": "1959952679",
-            "text": "Event Log errors detected on {{ inventory_hostname }}: {{ truncated_event_log_errors }}"
-          }
+        body: "{{ {'chat_id': '1959952679', 'text': 'Event Log errors detected on ' + inventory_hostname + ': ' + truncated_event_log_errors} | to_json }}"
         status_code: 200
       when: event_log_errors.stdout != ""
 
@@ -97,10 +84,6 @@
         method: POST
         headers:
           Content-Type: "application/json"
-        body: |
-          {
-            "chat_id": "1959952679",
-            "text": "No Event Log errors detected on {{ inventory_hostname }} in the last 30 minutes."
-          }
+        body: "{{ {'chat_id': '1959952679', 'text': 'No Event Log errors detected on ' + inventory_hostname + ' in the last 30 minutes.'} | to_json }}"
         status_code: 200
       when: event_log_errors.stdout == ""
