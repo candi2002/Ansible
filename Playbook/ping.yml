@@ -20,13 +20,12 @@
       register: syslog_errors
       ignore_errors: yes
 
-    - name: Write syslog errors to a file
-      copy:
-        content: "{{ syslog_errors.stdout }}"
-        dest: "/tmp/syslog_errors_{{ inventory_hostname }}.txt"
+    - name: Truncate syslog errors if too long
+      set_fact:
+        truncated_syslog_errors: "{{ syslog_errors.stdout[:4000] }}"
       when: syslog_errors.stdout != ""
 
-    - name: Send Telegram message for Ubuntu syslog errors (with file link)
+    - name: Send Telegram message for Ubuntu syslog errors
       uri:
         url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
         method: POST
@@ -35,7 +34,7 @@
         body: |
           {
             "chat_id": "1959952679",
-            "text": "Syslog errors detected on {{ inventory_hostname }}. See the errors in the attached file."
+            "text": "Syslog errors detected on {{ inventory_hostname }}: {{ truncated_syslog_errors }}"
           }
         status_code: 200
       when: syslog_errors.stdout != ""
@@ -58,13 +57,12 @@
       register: event_log_errors
       ignore_errors: yes
 
-    - name: Write Event Log errors to a file
-      win_copy:
-        content: "{{ event_log_errors.stdout }}"
-        dest: "C:\\temp\\event_log_errors_{{ inventory_hostname }}.txt"
+    - name: Truncate Event Log errors if too long
+      set_fact:
+        truncated_event_log_errors: "{{ event_log_errors.stdout[:4000] }}"
       when: event_log_errors.stdout != ""
 
-    - name: Send Telegram message for Windows Event Log errors (with file link)
+    - name: Send Telegram message for Windows Event Log errors
       uri:
         url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
         method: POST
@@ -73,7 +71,7 @@
         body: |
           {
             "chat_id": "1959952679",
-            "text": "Event Log errors detected on {{ inventory_hostname }}. See the errors in the attached file."
+            "text": "Event Log errors detected on {{ inventory_hostname }}: {{ truncated_event_log_errors }}"
           }
         status_code: 200
       when: event_log_errors.stdout != ""
