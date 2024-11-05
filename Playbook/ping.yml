@@ -52,11 +52,16 @@
     - name: Ping the Windows hosts
       win_ping:
 
-    - name: Install necessary applications on Windows
+    - name: Install IIS on Windows
       win_feature:
         name: Web-Server
         state: present
       when: ansible_os_family == "Windows"
+
+    # Hoặc sử dụng win_shell như sau:
+    # - name: Install IIS on Windows
+    #   win_shell: |
+    #     Install-WindowsFeature -Name Web-Server -IncludeManagementTools
 
     - name: Check Event Log for Errors on Windows
       win_shell: "Get-EventLog -LogName System -EntryType Error | Where-Object { $_.TimeGenerated -gt (Get-Date).AddMinutes(-30) }"
@@ -87,3 +92,4 @@
         body: "{{ {'chat_id': '1959952679', 'text': 'No Event Log errors detected on ' + inventory_hostname + ' in the last 30 minutes.'} | to_json }}"
         status_code: 200
       when: event_log_errors.stdout == ""
+
