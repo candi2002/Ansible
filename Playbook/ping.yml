@@ -22,13 +22,13 @@
 
     - name: Send Telegram message for Ubuntu syslog errors
       uri:
-        url: "https://api.telegram.org/bot<API_TOKEN>/sendMessage"
+        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
         method: POST
         headers:
           Content-Type: "application/json"
         body: |
           {
-            "chat_id": "<CHAT_ID>",
+            "chat_id": "1959952679",
             "text": "Syslog errors detected on {{ inventory_hostname }}: {{ syslog_errors.stdout }}"
           }
         status_code: 200
