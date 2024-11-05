@@ -16,7 +16,8 @@
       when: ansible_os_family == "Debian"
 
     - name: Check syslog for errors in the last 30 minutes on Ubuntu
-      shell: "grep -i error /var/log/syslog | grep -E \"$(date --date='30 minutes ago' +'%b %d %H:%M')|$(date +'%b %d %H:%M')\""
+      shell: |
+        awk -v date="$(date --date='30 minutes ago' '+%b %d %H:%M')" '$0 ~ date, $0 ~ /error/i' /var/log/syslog
       register: syslog_errors
       ignore_errors: yes
 
@@ -38,6 +39,20 @@
           }
         status_code: 200
       when: syslog_errors.stdout != ""
+
+    - name: Send Telegram message if no syslog errors
+      uri:
+        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {
+            "chat_id": "1959952679",
+            "text": "No syslog errors detected on {{ inventory_hostname }} in the last 30 minutes."
+          }
+        status_code: 200
+      when: syslog_errors.stdout == ""
 
 # Play cho Windows
 - name: Playbook for Windows
@@ -75,3 +90,17 @@
           }
         status_code: 200
       when: event_log_errors.stdout != ""
+
+    - name: Send Telegram message if no Event Log errors
+      uri:
+        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {
+            "chat_id": "1959952679",
+            "text": "No Event Log errors detected on {{ inventory_hostname }} in the last 30 minutes."
+          }
+        status_code: 200
+      when: event_log_errors.stdout == ""
