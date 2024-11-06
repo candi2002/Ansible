@@ -10,6 +10,7 @@
     chdir: /opt/flask_web/upload-img
 
 - name: Create systemd service for Flask app
+  become: yes  # Thêm quyền root cho task này
   copy:
     dest: /etc/systemd/system/upload_flask_app.service
     content: |
@@ -28,9 +29,11 @@
       WantedBy=multi-user.target
 
 - name: Reload systemd to apply new service
+  become: yes  # Thêm quyền root cho task này
   command: systemctl daemon-reload
 
 - name: Enable and start Flask app service
+  become: yes  # Thêm quyền root cho task này
   systemd:
     name: upload_flask_app
     state: started
