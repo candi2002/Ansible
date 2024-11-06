@@ -27,6 +27,8 @@
 
       [Install]
       WantedBy=multi-user.target
+  notify:
+    - Restart Flask app service  # Thêm notify cho handler này
 
 - name: Reload systemd to apply new service
   command: systemctl daemon-reload
@@ -37,3 +39,7 @@
     name: upload_flask_app
     state: started
     enabled: yes
+  notify:
+    - Restart Flask app service  # Thêm notify cho handler này
+
+
