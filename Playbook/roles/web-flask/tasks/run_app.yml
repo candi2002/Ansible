@@ -35,7 +35,6 @@
 
       [Install]
       WantedBy=multi-user.target
-  notify: Restart Flask app service  # Gọi handler để restart Flask app sau khi tạo service
 
 - name: Reload systemd to apply new service
   become: yes  # Thêm quyền root cho task này
@@ -47,4 +46,11 @@
     name: upload_flask_app
     state: started
     enabled: yes
-  notify: Restart Flask app service  # Gọi handler sau khi dịch vụ được enable và start
+
+# Handlers placed here
+handlers:
+  - name: Restart Flask app service
+    systemd:
+      name: upload_flask_app
+      state: restarted
+      enabled: yes
