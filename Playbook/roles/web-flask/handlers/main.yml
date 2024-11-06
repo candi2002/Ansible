@@ -2,6 +2,7 @@
 - name: Restart Flask app service
   systemd:
     name: flask_app
+    become: yes
     state: restarted
     enabled: yes
 
