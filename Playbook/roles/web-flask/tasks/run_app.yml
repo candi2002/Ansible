@@ -1,9 +1,12 @@
+---
 - name: Ensure virtual environment is created
+  become: yes  # Thêm quyền root cho task này
   command: python3 -m venv /opt/flask_web/upload-img/venv
   args:
     creates: /opt/flask_web/upload-img/venv
 
 - name: Install Flask and dependencies in virtual environment
+  become: yes  # Thêm quyền root cho task này
   command: /opt/flask_web/upload-img/venv/bin/pip install Flask flask_sqlalchemy gunicorn
   args:
     chdir: /opt/flask_web/upload-img
@@ -46,11 +49,3 @@
     name: upload_flask_app
     state: started
     enabled: yes
-
-# Handlers placed here
-handlers:
-  - name: Restart Flask app service
-    systemd:
-      name: upload_flask_app
-      state: restarted
-      enabled: yes
