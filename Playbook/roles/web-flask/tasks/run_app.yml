@@ -42,6 +42,8 @@
 - name: Reload systemd to apply new service
   become: yes  # Thêm quyền root cho task này
   command: systemctl daemon-reload
+  notify:
+    - Restart Flask app service  # Gọi handler sau khi reload systemd
 
 - name: Enable and start Flask app service
   become: yes  # Thêm quyền root cho task này
