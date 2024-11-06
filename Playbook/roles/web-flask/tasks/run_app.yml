@@ -1,18 +1,20 @@
 ---
-- name: Check who am I
-  shell: whoami
-  register: w
+- name: Ensure virtual environment is created
+  command: python3 -m venv /opt/flask_web/upload-img/venv
+  args:
+    creates: /opt/flask_web/upload-img/venv
 
-- name: Display user information
-  debug:
-    msg: "{{ w.stdout }}"
+- name: Install Flask and dependencies in virtual environment
+  command: /opt/flask_web/upload-img/venv/bin/pip install Flask flask_sqlalchemy gunicorn
+  args:
+    chdir: /opt/flask_web/upload-img
 
 - name: Create systemd service for Flask app
   copy:
-    dest: /etc/systemd/system/flask_web.service
+    dest: /etc/systemd/system/upload_flask_app.service
     content: |
       [Unit]
-      Description=Gunicorn instance to serve Flask web app
+      Description=Gunicorn instance to serve Flask app
       After=network.target
 
       [Service]
@@ -25,27 +27,11 @@
       [Install]
       WantedBy=multi-user.target
 
-- name: Reload systemd to apply changes
+- name: Reload systemd to apply new service
   command: systemctl daemon-reload
 
-- name: Enable and start Flask web app service
+- name: Enable and start Flask app service
   systemd:
-    name: flask_web
+    name: upload_flask_app
     state: started
     enabled: yes
-
-- name: Open port 5000 on the firewall (if needed)
-  ufw:
-    rule: allow
-    port: 5000
-    proto: tcp
-    comment: "Allow Flask web server traffic on port 5000"
-
-- name: Check Flask web app service status
-  shell: systemctl status flask_web
-  register: service_status
-  ignore_errors: yes
-
-- name: Debug service status
-  debug:
-    msg: "{{ service_status.stdout }}"
