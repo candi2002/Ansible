@@ -1,4 +1,3 @@
----
 - name: Ensure virtual environment is created
   command: python3 -m venv /opt/flask_web/upload-img/venv
   args:
@@ -8,6 +7,15 @@
   command: /opt/flask_web/upload-img/venv/bin/pip install Flask flask_sqlalchemy gunicorn
   args:
     chdir: /opt/flask_web/upload-img
+
+- name: Ensure the 'static/uploads' directory has correct permissions
+  become: yes  # Thêm quyền root cho task này
+  file:
+    path: /opt/flask_web/upload-img/static/uploads
+    owner: candi
+    group: www-data
+    mode: '0775'
+    state: directory
 
 - name: Create systemd service for Flask app
   become: yes  # Thêm quyền root cho task này
