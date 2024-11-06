@@ -163,11 +163,11 @@ cd
 ls -l /opt/semaphore/.ssh/
 ssh-keygen -t ed25519 -f /opt/semaphore/.ssh/id_ed25519
 chmod 600 /opt/semaphore/.ssh/id_ed25519
-ssh-copy-id -i /opt/semaphore/.ssh/id_ed25519.pub candi@192.168.9.113
+ssh-copy-id -i /opt/semaphore/.ssh/id_ed25519.pub candi@192.168.1.107
 ssh -i /opt/semaphore/.ssh/id_ed25519 candi@192.168.9.116
 exit
 
-ssh-copy-id -i /opt/semaphore/.ssh/id_ed25519.pub candi@192.168.9.158
+ssh-copy-id -i /opt/semaphore/.ssh/id_ed25519.pub candi@192.168.1.108
 exit 
 
 cat /opt/semaphore/.ssh/id_ed25519
