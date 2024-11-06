@@ -1,7 +1,7 @@
 ---
 - name: Restart Flask app service
+  become: yes  # Cấp quyền root cho task này
   systemd:
     name: flask_app
     state: restarted
     enabled: yes
-
