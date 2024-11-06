@@ -2,7 +2,7 @@
 
 # Variables
 REPO_URL = git@github.com:candi2002/Ansible.git
-DEST_DIR = /opt/ansible/semaphore
+DEST_DIR = /opt/ansible/demo
 
 # Default target
 all: help
