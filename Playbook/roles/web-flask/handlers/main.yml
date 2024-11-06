@@ -1,6 +1,6 @@
 ---
 - name: Restart Flask app service
-  become: yes  # Cấp quyền root cho task này
+  become: yes  # Thêm quyền root
   systemd:
     name: upload_flask_app
     state: restarted
