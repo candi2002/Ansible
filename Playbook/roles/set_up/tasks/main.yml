@@ -10,3 +10,5 @@
 - include_tasks: install_browser.yml
 
 - include_tasks: install_other_software.yml
+
+- include_taskd: enable_cp_paste.yml
