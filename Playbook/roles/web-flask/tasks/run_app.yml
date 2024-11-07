@@ -3,7 +3,7 @@
   become: yes
   file:
     path: /opt/flask_web/upload-img
-    owner: admin
+    owner: candi
     group: www-data
     mode: '0775'
     state: directory
