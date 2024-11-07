@@ -1,0 +1,10 @@
+---
+- name: Stop Flask app service
+  hosts: host
+  become: yes  # Thêm quyền root
+  tasks:
+    - name: Stop Flask app service
+      systemd:
+        name: upload_flask_app
+        state: stopped
+        enabled: no  # Tắt dịch vụ không tự khởi động khi boot
