@@ -9,11 +9,14 @@
     state: directory
     recurse: yes
     
+- name: Remove existing virtual environment (if exists)
+  become: yes
+  command: rm -rf /opt/flask_web/upload-img/venv
+  when: ansible_facts['os_family'] == "Debian"  # Cụ thể cho hệ điều hành Debian/Ubuntu
+
 - name: Ensure virtual environment is created
-  become: yes  # Thêm quyền root cho task này
+  become: yes
   command: python3 -m venv /opt/flask_web/upload-img/venv
-  args:
-    creates: /opt/flask_web/upload-img/venv
     
 - name: Ensure pip is installed in virtual environment
   command: /opt/flask_web/upload-img/venv/bin/python -m ensurepip
