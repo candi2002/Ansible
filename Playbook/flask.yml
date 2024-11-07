@@ -1,6 +1,6 @@
 ---
 - name: Deploy Flask Web Server and Quiz App
-  hosts: controller
+  hosts: host
   become: yes
   roles:
     - web-flask
