@@ -1,0 +1,14 @@
+---
+- name: Cài đặt open-vm-tools và open-vm-tools-desktop
+  apt:
+    name:
+      - open-vm-tools
+      - open-vm-tools-desktop
+      state: present
+
+- name: Khởi động lại máy ảo sau khi cài đặt VMware Tools
+  reboot:
+
+- name: Hiển thị thông báo hoàn thành
+  debug:
+    msg: "Cài đặt VMware Tools và bật copy-paste thành công. Máy ảo đã được khởi động lại."
