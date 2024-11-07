@@ -2,14 +2,5 @@
 - name: Deploy Flask Web Server and Quiz App
   hosts: host
   become: yes
-  tasks:
-    - name: Ensure Python3 and venv are installed
-      apt:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - python3
-        - python3-venv
-        - python3-pip
   roles:
     - web-flask
