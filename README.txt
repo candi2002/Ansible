@@ -101,6 +101,7 @@ echo $PATH
 //nó sẽ hiện ra một mớ, k lỗi là oke
 pipx install --include-deps ansible
 ansible --version
+pipx inject ansible pywinrm
 
 nano .ansible.cfg
 //Nội dung trong file nè
