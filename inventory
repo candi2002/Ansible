@@ -3,13 +3,25 @@ controller
 host
 
 [controller]
-192.168.1.108 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=candi
+192.168.1.108
 
 [host]
-192.168.1.32 ansible_ssh_user=candi ansible_become=yes ansible_become_user=root ansible_become_pass=admin
+192.168.1.32
 
 [windows]
 windows10 ansible_host=192.168.1.15
+
+[controller:vars]
+ansible_ssh_user=candi
+ansible_become=yes
+ansible_become_user=root
+ansible_become_pass=candi
+
+[host:vars]
+ansible_ssh_user=candi
+ansible_become=yes
+ansible_become_user=root
+ansible_become_pass=admin
 
 [windows:vars]
 ansible_user=ansible
