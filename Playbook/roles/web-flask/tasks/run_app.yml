@@ -14,6 +14,12 @@
   command: python3 -m venv /opt/flask_web/upload-img/venv
   args:
     creates: /opt/flask_web/upload-img/venv
+    
+- name: Ensure pip is installed in virtual environment
+  command: /opt/flask_web/upload-img/venv/bin/python -m ensurepip
+  args:
+    creates: /opt/flask_web/upload-img/venv/bin/pip
+
 
 - name: Install Flask and dependencies in virtual environment
   become: yes  # Thêm quyền root cho task này
