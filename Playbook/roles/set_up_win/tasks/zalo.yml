@@ -12,11 +12,11 @@
   win_get_url:
     url: "https://zalo.me/download/zalo-pc?utm=90000"
     dest: "C:\\temp\\ZaloSetup.exe"
-- name: Cài đặt Zalo
-  win_package:
-    path: "C:\\temp\\ZaloSetup.exe"
-    arguments: /silent
-    state: present
+    
+- name: Cài đặt Zalo bằng PowerShell
+  win_shell: |
+    Start-Process "C:\temp\ZaloSetup.exe" -ArgumentList "/silent" -Wait
+
 
 - name: Xóa file cài đặt
   win_file:
