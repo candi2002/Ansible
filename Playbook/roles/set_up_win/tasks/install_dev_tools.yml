@@ -1,7 +1,4 @@
 ---
-- name: Cập nhật Chocolatey
-  win_chocolatey_facts:
-  
 - name: Cài đặt Python 3
   win_chocolatey:
     name: python3
