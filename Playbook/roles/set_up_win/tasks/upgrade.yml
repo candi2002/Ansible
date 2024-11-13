@@ -11,12 +11,8 @@
   win_reboot:
   when: update_result.reboot_required
 
-- name: Xóa tệp vlc.install.nupkg không hợp lệ
-  win_file:
-    path: C:\ProgramData\chocolatey\lib\vlc.install\vlc.install.nupkg
-    state: absent
-
 - name: Đảm bảo Chocolatey được cài đặt
   win_chocolatey:
     name: all
     state: latest
+    ignore_checksums: yes
