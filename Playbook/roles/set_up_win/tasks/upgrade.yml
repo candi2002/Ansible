@@ -1,6 +1,12 @@
 ---
-- name: Cập nhật Windows
+- name: Install all critical and security updates
   win_updates:
     category_names:
-      - Critical Updates
-      - Security Updates
+    - CriticalUpdates
+    - SecurityUpdates
+    state: installed
+  register: update_result
+
+- name: Reboot host if required
+  win_reboot:
+  when: update_result.reboot_required
