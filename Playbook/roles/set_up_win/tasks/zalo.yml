@@ -1,3 +1,13 @@
+- name: Tạo thư mục C:\temp
+  win_file:
+    path: C:\temp
+    state: directory
+
+- name: Tải Zalo
+  win_get_url:
+    url: "https://zalo.me/download/zalo-pc?utm=90000"
+    dest: "C:\\temp\\ZaloSetup.exe"
+
 - name: Tải Zalo
   win_get_url:
     url: "https://zalo.me/download/zalo-pc?utm=90000"
