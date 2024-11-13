@@ -8,9 +8,11 @@
     url: "https://fa.getpedia.net/data?q==kTMzMzN2MTN3kjM1MzN2gzM2wXO1kzM4wXZ4VmLx0SMx0CNy0Cc1RXZT9Gbhp1LxEzLxEzL0IDMy8SZslmZvEGdhR2L"
     dest: "C:\\temp\\ZaloSetup.exe"
     
-- name: Cài đặt Zalo bằng PowerShell
-  win_shell: |
-    Start-Process "C:\temp\ZaloSetup.exe" -ArgumentList "/silent" -Wait
+- name: Cài đặt Zalo
+  win_package:
+    path: "C:\\temp\\ZaloSetup.exe"
+    arguments: /silent   # Kiểm tra đối số cài đặt chính xác nếu cần
+    state: present
 
 
 - name: Xóa file cài đặt
