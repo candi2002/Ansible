@@ -14,4 +14,9 @@
 - name: Đảm bảo Chocolatey được cài đặt
   win_chocolatey:
     name: all
+    state: absent
+
+- name: Đảm bảo Chocolatey được cài đặt
+  win_chocolatey:
+    name: all
     state: latest
