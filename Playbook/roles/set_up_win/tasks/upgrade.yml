@@ -13,4 +13,5 @@
 
 - name: Đảm bảo Chocolatey được cài đặt
   win_chocolatey:
-    state: present
+    name: all
+    state: latest
