@@ -1,4 +1,50 @@
 ---
+# Play cho Ubuntu
+- name: Playbook for Linux
+  hosts: linux
+  become: yes
+  tasks:
+    - name: Ping the Ubuntu hosts
+      ping:
+
+    - name: Install necessary packages on Ubuntu
+      apt:
+        name:
+          - curl
+          - vim
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Check syslog for errors in the last 30 minutes on Ubuntu
+      shell: "grep -i error /var/log/syslog | grep -E \"$(date --date='30 minutes ago' +'%b %d %H:%M')|$(date +'%b %d %H:%M')\""
+      register: syslog_errors
+      ignore_errors: yes
+
+    - name: Truncate syslog errors if too long
+      set_fact:
+        truncated_syslog_errors: "{{ syslog_errors.stdout[:4000] }}"
+      when: syslog_errors.stdout != ""
+
+    - name: Send Telegram message for Ubuntu syslog errors
+      uri:
+        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: "{{ {'chat_id': '1959952679', 'text': 'Syslog errors detected on ' + inventory_hostname + ': ' + truncated_syslog_errors} | to_json }}"
+        status_code: 200
+      when: syslog_errors.stdout != ""
+
+    - name: Send Telegram message if no syslog errors
+      uri:
+        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: "{{ {'chat_id': '1959952679', 'text': 'No syslog errors detected on ' + inventory_hostname + ' in the last 30 minutes.'} | to_json }}"
+        status_code: 200
+      when: syslog_errors.stdout == ""
+
 # Play cho Windows
 - name: Playbook for Windows
   hosts: windows
