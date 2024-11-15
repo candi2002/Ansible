@@ -9,7 +9,7 @@ host
 192.168.1.6
 
 [windows]
-windows10 ansible_host=192.168.1.61
+windows10 ansible_host=192.168.1.104
 
 [controller:vars]
 ansible_ssh_user=candi
