@@ -1,4 +1,4 @@
-- name: Tạo thư mục đích cho ứng dụng
+- name: Create target directory for the application
   ansible.builtin.file:
     path: /opt/flask_web/upload-img
     state: directory
@@ -6,50 +6,49 @@
     group: candi
     mode: '0755'
 
-- name: Sao lưu thư mục uploads nếu tồn tại (Giữ lại ảnh của những lần trước đó)
+- name: Backup the uploads directory if it exists (Preserve previous images)
   ansible.builtin.command:
     cmd: "cp -r /opt/flask_web/upload-img/static/uploads /opt/flask_web/uploads_backup"
   ignore_errors: yes
 
-- name: Xóa thư mục upload-img nếu đã tồn tại
+- name: Remove the upload-img directory if it exists
   ansible.builtin.file:
     path: /opt/flask_web/upload-img
     state: absent
   ignore_errors: yes
 
-- name: Tải về file ZIP chứa toàn bộ repository từ GitHub
+- name: Download the ZIP file containing the entire repository from GitHub
   ansible.builtin.command:
     cmd: "curl -L -o /tmp/repo.zip https://github.com/candi2002/Ansible/archive/refs/heads/main.zip"
 
-- name: Giải nén file ZIP vào thư mục đích
+- name: Unarchive the ZIP file into the target directory
   ansible.builtin.unarchive:
     src: /tmp/repo.zip
     dest: /opt/flask_web/
     remote_src: yes
 
-- name: Di chuyển thư mục upload-img vào vị trí mong muốn
+- name: Move the upload-img directory to the desired location
   ansible.builtin.command:
     cmd: "mv /opt/flask_web/Ansible-main/upload-img /opt/flask_web/upload-img"
 
-- name: Khôi phục thư mục uploads
+- name: Restore the uploads directory
   ansible.builtin.shell:
     cmd: "cp -r /opt/flask_web/uploads_backup/* /opt/flask_web/upload-img/static/uploads"
   ignore_errors: yes
   become: yes
 
-
-- name: Xóa file ZIP sau khi giải nén
+- name: Remove the ZIP file after extraction
   ansible.builtin.file:
     path: /tmp/repo.zip
     state: absent
 
-- name: Xóa thư mục backup sau khi lấy xong
+- name: Remove the backup directory after use
   ansible.builtin.file:
     path: /opt/flask_web/uploads_backup
     state: absent
   become: yes  
-  
-- name: Xóa thư mục Ansible sau khi lấy xong
+
+- name: Remove the Ansible directory after use
   ansible.builtin.file:
     path: /opt/flask_web/Ansible-main
     state: absent
