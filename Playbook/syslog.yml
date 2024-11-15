@@ -37,7 +37,7 @@
 
     - name: Send Telegram message if no syslog errors
       uri:
-        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt4/sendMessage"
+        url: "https://api.telegram.org/bot7607504619:AAEM0ViUgqtDb7BWf01SQGA_V_D0yDHQt44/sendMessage"
         method: POST
         headers:
           Content-Type: "application/json"
